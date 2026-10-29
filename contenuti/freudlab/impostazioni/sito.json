@@ -1,0 +1,51 @@
+{
+  "nome": "Laboratorio freudiano Milano",
+  "sigla": "Freudlab",
+  "descrizione": "Laboratorio freudiano Milano: scuola quadriennale di specializzazione in psicoterapia a orientamento psicoanalitico lacaniano, riconosciuta dal MIUR.",
+  "indirizzo": "Piazza Aspromonte 13, 20131 Milano",
+  "come_arrivare": "MM1 e MM2 – fermata Loreto, uscita viale Gran Sasso",
+  "telefono": "347 8445889",
+  "email": "infofreudlab@gmail.com",
+  "direttore": "Marisa Fiumanò",
+  "telefono_direttore": "338 2647110",
+  "email_direttore": "lfiumano@tiscali.it",
+  "sede_roma": {
+    "nome": "Laboratorio freudiano Roma",
+    "indirizzo": "Lungotevere degli Artigiani 30, Roma",
+    "telefono": "347 7475703",
+    "email": "info@laboratoriofreudiano.it",
+    "sito": "http://www.laboratoriofreudiano.it",
+    "direttore": "Luigi Burzotta"
+  },
+  "mappa": "https://www.openstreetmap.org/?mlat=45.4841&mlon=9.2195#map=17/45.4841/9.2195",
+  "modulo_contatti": "",
+  "newsletter": "",
+  "social": [
+    {
+      "nome": "Facebook",
+      "url": "https://www.facebook.com/freudlab.milano/"
+    },
+    {
+      "nome": "X",
+      "url": "https://twitter.com/freudlabmilano"
+    }
+  ],
+  "link_utili": [
+    {
+      "nome": "Associazione lacaniana internazionale Milano",
+      "url": "https://ali-milano.it"
+    },
+    {
+      "nome": "Association lacanienne internationale",
+      "url": "https://www.freud-lacan.com"
+    },
+    {
+      "nome": "Laboratorio freudiano Roma",
+      "url": "http://www.laboratoriofreudiano.it"
+    },
+    {
+      "nome": "Casa della Cultura di Milano",
+      "url": "https://casadellacultura.it"
+    }
+  ]
+}

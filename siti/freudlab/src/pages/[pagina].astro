@@ -1,0 +1,18 @@
+---
+// Pagine di testo semplici: chi siamo, statuto, storico, introduzione alla psicoanalisi
+import { getCollection, render } from 'astro:content';
+import Pagina from '../layouts/Pagina.astro';
+
+export async function getStaticPaths() {
+  const pagine = await getCollection('pagine', (p) => p.id !== 'collana-nodi');
+  return pagine.map((p) => ({ params: { pagina: p.id }, props: { p } }));
+}
+const { p } = Astro.props;
+const { Content } = await render(p);
+const occhiello = ['la-scuola', 'piano-di-studi', 'ammissione'].includes(p.id) ? 'La scuola' : undefined;
+---
+<Pagina titolo={p.data.titolo} sottotitolo={p.data.sottotitolo} occhiello={occhiello}>
+  <article class="sezione">
+    <div class="stretto prosa"><Content /></div>
+  </article>
+</Pagina>

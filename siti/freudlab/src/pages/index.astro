@@ -1,0 +1,163 @@
+---
+import Base from '../layouts/Base.astro';
+import ProssimiEventi from '@condiviso/components/ProssimiEventi.astro';
+import ModuloContatti from '@condiviso/components/ModuloContatti.astro';
+import home from '@impostazioni/home.json';
+import sito from '@impostazioni/sito.json';
+import { md, CATEGORIE, pubblicazioniDelSito } from '@condiviso/lib/utili';
+
+const pubblicazioni = await pubblicazioniDelSito();
+const ultime = pubblicazioni.filter((p) => p.data.categoria !== 'libri').slice(0, 3);
+const libri = pubblicazioni.filter((p) => p.data.categoria === 'libri' && p.data.immagine).slice(0, 4);
+
+const ore = [
+  { numero: 105, nome: 'insegnamenti teorici' },
+  { numero: 245, nome: 'insegnamenti clinici' },
+  { numero: 150, nome: 'tirocinio' },
+];
+---
+<Base>
+  <section class="eroe">
+    <div class="contenitore eroe__griglia">
+      <div class="eroe__testo">
+        <span class="nodo" aria-hidden="true"><i></i><i></i><i></i></span>
+        <h1>{home.titolo}</h1>
+        <p class="eroe__sotto">{home.sottotitolo}</p>
+        <div class="eroe__azioni">
+          <a class="bottone" href="/la-scuola/">La scuola</a>
+          <a class="bottone bottone--chiaro" href="/ammissione/">Come iscriversi</a>
+        </div>
+      </div>
+      <div class="eroe__immagine">
+        <img src={home.immagine} alt="Jacques Lacan e Sigmund Freud" width="800" height="1132" />
+      </div>
+    </div>
+  </section>
+
+  <section class="sezione">
+    <div class="contenitore due-colonne">
+      <div>
+        <p class="occhiello">La scuola</p>
+        <h2>{home.scuola_titolo}</h2>
+        <div set:html={md(home.scuola_testo)} />
+        <a class="bottone bottone--chiaro" href="/la-scuola/">Scopri la scuola</a>
+      </div>
+      <img class="foto" src={home.scuola_immagine} alt="Una lezione al Laboratorio freudiano" loading="lazy" width="800" height="644" />
+    </div>
+  </section>
+
+  <section class="sezione sezione--carta">
+    <div class="contenitore">
+      <p class="occhiello">Piano di studi</p>
+      <h2 class="senza-margine">Quattro anni, 500 ore l’anno</h2>
+      <ul class="ore">
+        {ore.map((o) => (
+          <li><strong>{o.numero}</strong><span>ore di {o.nome}</span></li>
+        ))}
+      </ul>
+      <p><a href="/piano-di-studi/">Gli insegnamenti anno per anno →</a></p>
+    </div>
+  </section>
+
+  <section class="sezione">
+    <div class="contenitore due-colonne">
+      <div>
+        <p class="occhiello">Calendario</p>
+        <h2>Prossimi appuntamenti</h2>
+        <p>Insegnamenti del sabato, seminari e giornate di studio del Laboratorio freudiano e dell’Associazione lacaniana internazionale – Milano.</p>
+        <p><a href="/appuntamenti/">Tutti gli appuntamenti →</a><br /><a href="/appuntamenti.ics">Aggiungi al tuo calendario</a></p>
+      </div>
+      <ProssimiEventi limite={4} />
+    </div>
+  </section>
+
+  <section class="citazione">
+    <div class="stretto">
+      <blockquote>
+        <p>{home.citazione}</p>
+        <footer>{home.citazione_autore}</footer>
+      </blockquote>
+    </div>
+  </section>
+
+  <section class="sezione">
+    <div class="contenitore">
+      <p class="occhiello">{CATEGORIE.editoriale}</p>
+      <h2 class="senza-margine">Ultimi testi</h2>
+      <div class="griglia-schede spazio">
+        {ultime.map((p) => (
+          <a class="scheda" href={`/pubblicazioni/${p.id}/`}>
+            {p.data.immagine && <img src={p.data.immagine} alt="" loading="lazy" />}
+            <div class="scheda__corpo">
+              <span class="etichetta">{CATEGORIE[p.data.categoria]}</span>
+              <h3>{p.data.titolo}</h3>
+            </div>
+          </a>
+        ))}
+      </div>
+      <div class="collana">
+        <div>
+          <p class="occhiello">Edizioni Mimesis</p>
+          <h3>Collana “Nodi”</h3>
+          <p>Diretta da Marisa Fiumanò: i punti di intersezione fra la clinica e la società contemporanea.</p>
+          <a href="/collana-nodi/">I libri della collana →</a>
+        </div>
+        <div class="copertine">
+          {libri.map((l) => <a href={`/pubblicazioni/${l.id}/`}><img src={l.data.immagine} alt={l.data.titolo} loading="lazy" /></a>)}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sezione sezione--carta">
+    <div class="contenitore due-colonne">
+      <div>
+        <p class="occhiello">Contatti</p>
+        <h2>Scrivici</h2>
+        <p>La sede didattica della scuola è in {sito.indirizzo}.<br /><span class="grigio">{sito.come_arrivare}</span></p>
+        <p>Tel. <a href={`tel:${sito.telefono.replace(/\s/g, '')}`}>{sito.telefono}</a><br /><a href={`mailto:${sito.email}`}>{sito.email}</a></p>
+      </div>
+      <ModuloContatti oggetto="Richiesta dal sito del Laboratorio freudiano" />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .eroe { background: #e9e7e3 url('/uploads/freudlab/2021/02/header-bg-scaled-2-1.jpg') center / cover no-repeat; border-bottom: 1px solid var(--linea); }
+  .eroe__griglia { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: clamp(32px, 6vw, 80px); align-items: center; padding: clamp(40px, 7vw, 88px) 0; }
+  .eroe h1 { text-transform: uppercase; font-size: clamp(2.1rem, 4.6vw, 3.4rem); line-height: 1.08; margin: 20px 0 16px; color: var(--accento-scuro); }
+  .eroe__sotto { font-size: 1.15rem; max-width: 520px; color: var(--inchiostro); }
+  .eroe__azioni { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .eroe__immagine img { width: 100%; max-height: 600px; object-fit: cover; object-position: top; border-radius: var(--raggio); box-shadow: 0 24px 60px rgb(0 0 0 / .18); }
+
+  .due-colonne { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 72px); align-items: center; }
+  .due-colonne h2 { margin-top: 0; }
+  .foto { width: 100%; border-radius: var(--raggio); }
+  .senza-margine { margin-top: 0; }
+  .grigio { color: var(--grigio); font-size: 0.95rem; }
+  .spazio { margin-top: 28px; }
+
+  .ore { list-style: none; padding: 0; margin: 28px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .ore li { display: flex; flex-direction: column; gap: 4px; padding: 24px; background: #fff; border-radius: var(--raggio); border-top: 4px solid var(--nodo-blu); }
+  .ore li:nth-child(1) { border-top-color: var(--nodo-giallo); }
+  .ore li:nth-child(3) { border-top-color: var(--nodo-rosso); }
+  .ore strong { font: 700 2.6rem/1 var(--titoli); color: var(--accento-scuro); font-variant-numeric: tabular-nums; }
+  .ore span { color: var(--grigio); }
+
+  .citazione { background: var(--accento-scuro); color: #fff; padding: clamp(56px, 8vw, 96px) 0; }
+  .citazione blockquote { margin: 0; }
+  .citazione p { font: 500 clamp(1.2rem, 2.4vw, 1.55rem)/1.55 var(--titoli); }
+  .citazione footer { margin-top: 20px; color: #b9c9dd; font-size: 0.95rem; }
+
+  .collana { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 40px; align-items: center; margin-top: 56px; padding: 32px; border: 1px solid var(--linea); border-radius: var(--raggio); }
+  .collana h3 { margin: 0 0 8px; font-size: 1.4rem; }
+  .copertine { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .copertine img { aspect-ratio: 16 / 10; object-fit: cover; border-radius: 3px; border: 1px solid var(--linea); }
+
+  @media (max-width: 860px) {
+    .eroe__griglia, .due-colonne, .collana { grid-template-columns: 1fr; }
+    .eroe__immagine img { max-height: 340px; }
+    .ore { grid-template-columns: 1fr; }
+    .copertine { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

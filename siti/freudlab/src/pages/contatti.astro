@@ -1,0 +1,40 @@
+---
+import Pagina from '../layouts/Pagina.astro';
+import ModuloContatti from '@condiviso/components/ModuloContatti.astro';
+import sito from '@impostazioni/sito.json';
+const roma = sito.sede_roma;
+---
+<Pagina titolo="Contatti" sottotitolo="Le sedi del Laboratorio freudiano a Milano e a Roma.">
+  <section class="sezione">
+    <div class="contenitore sedi">
+      <div class="sede">
+        <p class="occhiello">Milano · sede didattica</p>
+        <p><strong>{sito.indirizzo}</strong><br />{sito.come_arrivare}</p>
+        <p>Tel. <a href={`tel:${sito.telefono.replace(/\s/g, '')}`}>{sito.telefono}</a><br /><a href={`mailto:${sito.email}`}>{sito.email}</a></p>
+        <p>Direttore: {sito.direttore}<br />Tel. {sito.telefono_direttore} · <a href={`mailto:${sito.email_direttore}`}>{sito.email_direttore}</a></p>
+        <p><a class="bottone bottone--chiaro" href={sito.mappa} rel="noopener">Apri la mappa</a></p>
+      </div>
+      <div class="sede">
+        <p class="occhiello">Roma</p>
+        <p><strong>{roma.nome}</strong><br />{roma.indirizzo}</p>
+        <p>Tel. {roma.telefono}<br /><a href={`mailto:${roma.email}`}>{roma.email}</a></p>
+        <p>Direttore: {roma.direttore}</p>
+        <p><a href={roma.sito} rel="noopener">{roma.sito.replace(/^https?:\/\//, '')}</a></p>
+      </div>
+    </div>
+  </section>
+  <section class="sezione sezione--carta">
+    <div class="stretto">
+      <h2>Scrivici</h2>
+      <p>Per informazioni sulla scuola, sull’ammissione o per iscriverti ai seminari.</p>
+      <ModuloContatti oggetto="Richiesta dal sito del Laboratorio freudiano" />
+    </div>
+  </section>
+</Pagina>
+
+<style>
+  .sedi { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .sede { padding: 28px; border: 1px solid var(--linea); border-top: 3px solid var(--accento); border-radius: var(--raggio); }
+  h2 { margin-top: 0; }
+  @media (max-width: 760px) { .sedi { grid-template-columns: 1fr; } }
+</style>

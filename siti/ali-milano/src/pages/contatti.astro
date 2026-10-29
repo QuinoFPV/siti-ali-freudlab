@@ -1,0 +1,28 @@
+---
+import Pagina from '../layouts/Pagina.astro';
+import ModuloContatti from '@condiviso/components/ModuloContatti.astro';
+import sito from '@impostazioni/sito.json';
+---
+<Pagina titolo="Contatti" sottotitolo="Per informazioni su seminari, iscrizioni e attività dell’Associazione.">
+  <section class="sezione">
+    <div class="contenitore contatti">
+      <div>
+        <h2>Dove siamo</h2>
+        <p><strong>{sito.indirizzo}</strong><br />{sito.come_arrivare}</p>
+        <p>Tel. <a href={`tel:${sito.telefono.replace(/\s/g, '')}`}>{sito.telefono}</a><br /><a href={`mailto:${sito.email}`}>{sito.email}</a></p>
+        <p>Consultorio “Edipo in città”:<br /><a href={`mailto:${sito.email_consultorio}`}>{sito.email_consultorio}</a></p>
+        <p><a class="bottone bottone--chiaro" href={sito.mappa} rel="noopener">Apri la mappa</a></p>
+      </div>
+      <div>
+        <h2>Scrivici</h2>
+        <ModuloContatti />
+      </div>
+    </div>
+  </section>
+</Pagina>
+
+<style>
+  .contatti { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: clamp(32px, 6vw, 72px); }
+  .contatti h2 { margin-top: 0; }
+  @media (max-width: 860px) { .contatti { grid-template-columns: 1fr; } }
+</style>

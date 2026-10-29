@@ -1,0 +1,115 @@
+{
+  "direttore": "Marisa Fiumanò",
+  "segretario": "Alessandro Bertoloni",
+  "docenti": [
+    {
+      "nome": "Marisa Fiumanò",
+      "ruolo": "Psicoterapeuta, psicanalista",
+      "nota": "Direttore del Laboratorio freudiano di Milano"
+    },
+    {
+      "nome": "Luigi Burzotta",
+      "ruolo": "Psicoterapeuta, psicanalista",
+      "nota": "Rappresentante legale del Laboratorio freudiano per la formazione degli psicoterapeuti"
+    },
+    {
+      "nome": "Gabriela Alarcon",
+      "ruolo": "Psicoterapeuta"
+    },
+    {
+      "nome": "Ambra Formenti",
+      "ruolo": "Antropologa"
+    },
+    {
+      "nome": "Fabrizio Gambini",
+      "ruolo": "Psichiatra, psicanalista"
+    },
+    {
+      "nome": "Maria Carmela Gurnari",
+      "ruolo": "Psichiatra, psicanalista"
+    },
+    {
+      "nome": "Jean-Paul Hiltenbrand",
+      "ruolo": "Psichiatra, psicanalista"
+    },
+    {
+      "nome": "Renata Miletto",
+      "ruolo": "Psicoterapeuta, psicanalista"
+    },
+    {
+      "nome": "Susana Morath",
+      "ruolo": "Psicoterapeuta, psicanalista"
+    },
+    {
+      "nome": "Gaetano Romagnuolo",
+      "ruolo": "Psichiatra, psicanalista"
+    },
+    {
+      "nome": "Carl Dieter Rath",
+      "ruolo": "Psicanalista"
+    },
+    {
+      "nome": "Christian Rey",
+      "ruolo": "Neuropsichiatra infantile, psicanalista"
+    },
+    {
+      "nome": "Françoise Rey Sentenac",
+      "ruolo": "Psicologa, psicanalista"
+    },
+    {
+      "nome": "Johanna Vennemann",
+      "ruolo": "Psicoterapeuta, psicanalista"
+    },
+    {
+      "nome": "Paolo Scarano",
+      "ruolo": "Psicoterapeuta, psicanalista",
+      "nota": "Presidente ALI-Milano"
+    },
+    {
+      "nome": "Carlo Albarello",
+      "ruolo": "Linguista"
+    },
+    {
+      "nome": "Gérard Amiel",
+      "ruolo": "Psichiatra, psicanalista",
+      "nota": "Grenoble",
+      "visiting": true
+    },
+    {
+      "nome": "Jean-Louis Chassaing",
+      "ruolo": "Psichiatra, psicanalista",
+      "nota": "Clermont-Ferrand",
+      "visiting": true
+    },
+    {
+      "nome": "Alexis Chiari",
+      "ruolo": "Psichiatra, psicanalista",
+      "nota": "Grenoble",
+      "visiting": true
+    },
+    {
+      "nome": "Martine Lerude",
+      "ruolo": "Psichiatra, psicanalista",
+      "nota": "Parigi",
+      "visiting": true
+    },
+    {
+      "nome": "Jean-Pierre Lebrun",
+      "ruolo": "Psichiatra, psicanalista",
+      "nota": "Namur e Bruxelles",
+      "visiting": true
+    },
+    {
+      "nome": "Charles Melman",
+      "ruolo": "Psichiatra, psicanalista, fondatore dell’ALI",
+      "nota": "Parigi",
+      "visiting": true
+    },
+    {
+      "nome": "Jean-Jacques Tyszler",
+      "ruolo": "Psicoterapeuta, psicanalista",
+      "nota": "Parigi",
+      "visiting": true
+    }
+  ]
+}

@@ -1,12 +1,13 @@
 {
-  "name": "ali-milano-demo",
+  "name": "siti-ali-freudlab",
   "type": "module",
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
+    "dev": "astro dev --root siti/ali-milano --port 4321",
+    "dev:freudlab": "astro dev --root siti/freudlab --port 4322",
+    "build": "astro build --root siti/ali-milano && astro build --root siti/freudlab",
+    "build:ali": "astro build --root siti/ali-milano",
     "importa": "node scripts/importa-da-wordpress.mjs"
   },
   "dependencies": {

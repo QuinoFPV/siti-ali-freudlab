@@ -1,19 +1,18 @@
-// Solo per l'anteprima su GitHub Pages, dove il sito vive in una sottocartella
-// (es. https://utente.github.io/ali-milano-demo/): aggiunge la sottocartella
-// a tutti i percorsi assoluti delle pagine già generate in dist/.
+// Solo per l'anteprima su GitHub Pages, dove ogni sito vive in una sottocartella
+// (es. https://utente.github.io/siti-ali-freudlab/freudlab/): aggiunge la
+// sottocartella a tutti i percorsi assoluti delle pagine già generate.
 //
-// Uso: node scripts/prefissa-base.mjs /ali-milano-demo
+// Uso: node scripts/prefissa-base.mjs dist/freudlab /siti-ali-freudlab/freudlab
 
 import { readdir, readFile, writeFile } from 'node:fs/promises';
-import { join, extname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, extname, resolve } from 'node:path';
 
-const base = (process.argv[2] || '').replace(/\/$/, '');
+const dist = resolve(process.argv[2] || 'dist');
+const base = (process.argv[3] || '').replace(/\/$/, '');
 if (!base) {
   console.log('Nessuna sottocartella indicata: niente da fare.');
   process.exit(0);
 }
-const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 
 async function* file(dir) {
   for (const voce of await readdir(dir, { withFileTypes: true })) {

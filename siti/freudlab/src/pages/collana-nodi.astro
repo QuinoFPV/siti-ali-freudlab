@@ -1,0 +1,34 @@
+---
+import { getEntry, render } from 'astro:content';
+import Pagina from '../layouts/Pagina.astro';
+import { pubblicazioniDelSito } from '@condiviso/lib/utili';
+import sito from '@impostazioni/sito.json';
+
+const pagina = (await getEntry('pagine', 'collana-nodi'))!;
+const { Content } = await render(pagina);
+const libri = (await pubblicazioniDelSito()).filter((p) => p.data.categoria === 'libri');
+---
+<Pagina titolo={pagina.data.titolo} sottotitolo={pagina.data.sottotitolo}>
+  <section class="sezione">
+    <div class="stretto prosa"><Content /></div>
+  </section>
+  <section class="sezione sezione--carta">
+    <div class="contenitore">
+      <h2>I libri</h2>
+      <p class="nota">Per informazioni o per l’acquisto: tel. {sito.telefono}, <a href={`mailto:${sito.email}`}>{sito.email}</a>.</p>
+      <div class="griglia-schede">
+        {libri.map((p) => (
+          <a class="scheda" href={`/pubblicazioni/${p.id}/`}>
+            {p.data.immagine && <img src={p.data.immagine} alt="" loading="lazy" />}
+            <div class="scheda__corpo"><h3>{p.data.titolo}</h3></div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Pagina>
+
+<style>
+  h2 { margin-top: 0; }
+  .nota { color: var(--grigio); }
+</style>

@@ -1,5 +1,7 @@
 node_modules/
 dist/
 .astro/
+siti/*/.astro/
 .DS_Store
 .env
+contenuti/*/pagine-importate/

@@ -1,0 +1,46 @@
+---
+import Pagina from '../layouts/Pagina.astro';
+import { docenti, direttore, segretario } from '@impostazioni/docenti.json';
+
+const interni = docenti.filter((d) => !('visiting' in d && d.visiting));
+const visiting = docenti.filter((d) => 'visiting' in d && d.visiting);
+---
+<Pagina titolo="I docenti" occhiello="La scuola" sottotitolo={`Direttore responsabile ${direttore}, segretario ${segretario}. L’indirizzo teorico è la psicanalisi secondo l’insegnamento di Jacques Lacan.`}>
+  <section class="sezione">
+    <div class="contenitore">
+      <h2>Docenti</h2>
+      <ul class="docenti">
+        {interni.map((d) => (
+          <li>
+            <strong>{d.nome}</strong>
+            <span>{d.ruolo}</span>
+            {'nota' in d && d.nota && <em>{d.nota}</em>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+  <section class="sezione sezione--carta">
+    <div class="contenitore">
+      <h2>Visiting professor</h2>
+      <ul class="docenti">
+        {visiting.map((d) => (
+          <li>
+            <strong>{d.nome}</strong>
+            <span>{d.ruolo}</span>
+            {'nota' in d && d.nota && <em>{d.nota}</em>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Pagina>
+
+<style>
+  h2 { margin-top: 0; }
+  .docenti { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .docenti li { display: flex; flex-direction: column; gap: 3px; padding: 18px 20px; background: #fff; border: 1px solid var(--linea); border-left: 3px solid var(--accento); border-radius: var(--raggio); }
+  .docenti strong { font: 600 1.02rem/1.3 var(--titoli); color: var(--inchiostro); }
+  .docenti span { color: var(--grigio); font-size: 0.92rem; }
+  .docenti em { font-style: normal; font-size: 0.86rem; color: var(--accento); }
+</style>

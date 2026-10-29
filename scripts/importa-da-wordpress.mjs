@@ -1,10 +1,14 @@
 // Importa pubblicazioni, eventi e pagine da un sito WordPress (API REST pubblica)
-// e li salva come file Markdown nelle raccolte di Astro, scaricando le immagini.
+// e li salva come file Markdown in contenuti/, scaricando immagini e PDF.
 //
-// Uso: node scripts/importa-da-wordpress.mjs [https://ali-milano.it] [sigla-sito]
-// Esempio per Freudlab: node scripts/importa-da-wordpress.mjs https://freudlab.it freudlab
+// Eventi e pubblicazioni sono condivisi tra i siti: se un contenuto esiste già
+// (stesso titolo e stessa data) non viene duplicato, gli si aggiunge solo il sito.
+//
+// Uso: node scripts/importa-da-wordpress.mjs <indirizzo> <sigla>
+//   node scripts/importa-da-wordpress.mjs https://ali-milano.it ali-milano
+//   node scripts/importa-da-wordpress.mjs https://freudlab.it freudlab
 
-import { mkdir, writeFile, access } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, readdir, access } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import TurndownService from 'turndown';
@@ -12,14 +16,19 @@ import TurndownService from 'turndown';
 const SITO = (process.argv[2] || 'https://ali-milano.it').replace(/\/$/, '');
 const SIGLA = process.argv[3] || 'ali-milano';
 const RADICE = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CONTENUTI = join(RADICE, 'src/content');
-const UPLOADS = join(RADICE, 'public');
+const CONTENUTI = join(RADICE, 'contenuti');
+const PUBBLICO = join(RADICE, 'pubblico');
+// I file di siti diversi possono avere lo stesso nome: ognuno ha la sua cartella
+const CARTELLA_UPLOADS = SIGLA === 'ali-milano' ? '/uploads' : `/uploads/${SIGLA}`;
 
 const td = new TurndownService({ headingStyle: 'atx', bulletListMarker: '-', emDelimiter: '*' });
 td.remove(['script', 'style', 'form', 'noscript', 'iframe']);
 
+// Link pubblicitari inseriti di nascosto nei siti WordPress (orologi falsi e simili)
+const SPAM = /replic|uhren|montre|orolog|rolex|breitling|omega replica|scae\.it/i;
+
 async function json(url) {
-  const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (importazione ALI demo)' } });
+  const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (importazione siti ALI)' } });
   if (!r.ok) throw new Error(`${r.status} ${url}`);
   return r.json();
 }
@@ -36,6 +45,22 @@ async function tutte(endpoint) {
       return out;
     }
   }
+}
+
+// Alcuni siti vanno in errore chiedendo tutte le pagine insieme: le chiediamo una alla volta
+async function tutteLePagine() {
+  const insieme = await tutte('pages');
+  if (insieme.length) return insieme;
+  const ids = (await tutte('pages?_fields=id')).map((p) => p.id);
+  const out = [];
+  for (const id of ids) {
+    try {
+      out.push(await json(`${SITO}/wp-json/wp/v2/pages/${id}`));
+    } catch (e) {
+      console.warn(`  ! pagina ${id} non letta (${e.message})`);
+    }
+  }
+  return out;
 }
 
 const ENTITA = { amp: '&', quot: '"', lt: '<', gt: '>', nbsp: ' ', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“', hellip: '…', ndash: '–', mdash: '—' };
@@ -63,11 +88,11 @@ async function scarica(url) {
   if (!url) return '';
   const pulito = url.split('?')[0].replace(/^http:/, 'https:');
   const m = pulito.match(/\/wp-content\/uploads\/(.+)$/);
-  if (!m) return url;
-  const pubblico = `/uploads/${decodeURIComponent(m[1])}`;
+  if (!m || !pulito.startsWith(SITO.replace(/^http:/, 'https:'))) return url;
+  const pubblico = `${CARTELLA_UPLOADS}/${decodeURIComponent(m[1])}`;
   if (scaricati.has(pulito)) return scaricati.get(pulito);
   scaricati.set(pulito, pubblico);
-  const destinazione = join(UPLOADS, pubblico);
+  const destinazione = join(PUBBLICO, pubblico);
   try {
     await access(destinazione);
     return pubblico;
@@ -88,9 +113,12 @@ async function scarica(url) {
 // Ripulisce l'HTML prodotto da Divi e lo converte in Markdown
 async function markdown(html = '') {
   let h = html
-    .replace(/\[\/?et_pb_[^\]]*\]/g, '')
+    .replace(/\[\/?(?:et_pb|decm)_[^\]]*\]/g, '')
     .replace(/<span[^>]*class="[^"]*et-pb-icon[^"]*"[^>]*>.*?<\/span>/gs, '')
-    .replace(/<div[^>]*class="[^"]*et_pb_(?:contact_form|main_blurb_image|divider)[^"]*".*?<\/div>/gs, '');
+    .replace(/<div[^>]*class="[^"]*et_pb_(?:contact_form|main_blurb_image|divider)[^"]*".*?<\/div>/gs, '')
+    // via i link spam e i paragrafi che servono solo a contenerli
+    .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gs, (tutto, href, dentro) => (SPAM.test(href) || SPAM.test(testo(dentro)) ? '' : tutto))
+    .replace(/<p[^>]*>(?:(?!<\/p>).)*(?:replique|montres)(?:(?!<\/p>).)*<\/p>/gis, '');
   // Nei post Divi aggiunge in fondo la lista "Ultimi articoli": la togliamo
   h = h.split(/<h[1-6][^>]*>\s*Ultimi articoli\s*<\/h[1-6]>/i)[0];
   const urls = new Set([...h.matchAll(/(?:src|href)="([^"]*\/wp-content\/uploads\/[^"]+)"/g)].map((m) => m[1]));
@@ -116,26 +144,70 @@ async function salva(cartella, nome, dati, corpo) {
   await writeFile(join(dir, `${nome}.md`), `${frontmatter(dati)}\n${corpo}\n`);
 }
 
+// Contenuti già presenti (importati da un altro sito o creati dal pannello)
+async function esistenti(cartella) {
+  const dir = join(CONTENUTI, cartella);
+  const out = [];
+  for (const nome of await readdir(dir).catch(() => [])) {
+    if (!nome.endsWith('.md')) continue;
+    const file = join(dir, nome);
+    const testoFile = await readFile(file, 'utf8');
+    const campo = (k) => testoFile.match(new RegExp(`^${k}: "?([^"\\n]*)"?$`, 'm'))?.[1] ?? '';
+    out.push({ file, nome: nome.slice(0, -3), testoFile, titolo: campo('titolo'), inizio: campo('inizio'), data: campo('data') });
+  }
+  return out;
+}
+
+const parole = (s) => new Set(slug(s).split('-').filter((p) => p.length > 3));
+function simili(a, b) {
+  if (slug(a) === slug(b)) return true;
+  const pa = parole(a), pb = parole(b);
+  const comuni = [...pa].filter((p) => pb.has(p)).length;
+  return comuni >= 2 && comuni >= Math.min(pa.size, pb.size) * 0.5;
+}
+
+// Aggiunge questo sito alla lista "siti" di un contenuto che esiste già
+async function aggiungiSito(voce) {
+  const blocco = voce.testoFile.match(/^siti:\n((?:  - .*\n)+)/m);
+  if (blocco?.[1].includes(SIGLA)) return;
+  const nuovo = blocco
+    ? voce.testoFile.replace(blocco[0], `${blocco[0]}  - "${SIGLA}"\n`)
+    : voce.testoFile.replace(/^---\n/, `---\nsiti:\n  - "ali-milano"\n  - "${SIGLA}"\n`);
+  await writeFile(voce.file, nuovo);
+}
+
 async function importaPubblicazioni() {
   const categorie = Object.fromEntries((await tutte('categories')).map((c) => [c.id, c.slug]));
   const post = await tutte('posts?_embed=wp:featuredmedia');
-  const usati = new Set();
+  const gia = await esistenti('pubblicazioni');
+  const usati = new Set(gia.map((g) => g.nome));
+  let nuove = 0, unite = 0;
   for (const p of post) {
-    let nome = slug(p.title.rendered);
-    while (usati.has(nome)) nome += '-bis';
+    const titolo = testo(p.title.rendered);
+    const doppione = gia.find((g) => slug(g.titolo) === slug(titolo));
+    if (doppione) {
+      await aggiungiSito(doppione);
+      unite++;
+      continue;
+    }
+    let nome = slug(titolo);
+    while (usati.has(nome)) nome += `-${SIGLA}`;
     usati.add(nome);
-    const cat = p.categories.map((id) => categorie[id]).find((c) => ['libri', 'articoli', 'seminari', 'dossier'].includes(c)) || 'articoli';
+    const cat = p.categories.map((id) => categorie[id]).map((c) => (c?.startsWith('editoriale') ? 'editoriale' : c))
+      .find((c) => ['libri', 'articoli', 'seminari', 'dossier', 'editoriale'].includes(c)) || 'articoli';
     const immagine = p._embedded?.['wp:featuredmedia']?.[0]?.source_url;
     await salva('pubblicazioni', nome, {
-      titolo: testo(p.title.rendered),
+      titolo,
       data: p.date.slice(0, 10),
       categoria: cat,
       immagine: await scarica(immagine),
       riassunto: testo(p.excerpt.rendered).replace(/\s*\[…\]$/, '').slice(0, 300),
+      siti: [SIGLA],
       vecchio_url: p.link,
     }, await markdown(p.content.rendered));
+    nuove++;
   }
-  console.log(`Pubblicazioni: ${post.length}`);
+  console.log(`Pubblicazioni: ${nuove} nuove, ${unite} già presenti (aggiunto il sito)`);
 }
 
 async function importaEventi() {
@@ -145,15 +217,26 @@ async function importaEventi() {
     eventi.push(...d.events);
     if (!d.next_rest_url) break;
   }
-  const usati = new Set();
+  const gia = await esistenti('eventi');
+  const usati = new Set(gia.map((g) => g.nome));
+  let nuovi = 0, uniti = 0, saltati = 0;
   for (const e of eventi) {
-    let nome = `${e.start_date.slice(0, 10)}-${slug(e.title)}`;
+    const titolo = testo(e.title);
+    if (/^questo è un evento$/i.test(titolo)) { saltati++; continue; } // evento di prova
+    const inizio = e.start_date.slice(0, 16).replace(' ', 'T');
+    const doppione = gia.find((g) => g.inizio === inizio && simili(g.titolo, titolo));
+    if (doppione) {
+      await aggiungiSito(doppione);
+      uniti++;
+      continue;
+    }
+    let nome = `${e.start_date.slice(0, 10)}-${slug(titolo)}`;
     while (usati.has(nome)) nome += '-bis';
     usati.add(nome);
     const luogo = e.venue && !Array.isArray(e.venue) ? e.venue : null;
     await salva('eventi', nome, {
-      titolo: testo(e.title),
-      inizio: e.start_date.slice(0, 16).replace(' ', 'T'),
+      titolo,
+      inizio,
       fine: e.end_date.slice(0, 16).replace(' ', 'T'),
       tutto_il_giorno: e.all_day ? true : undefined,
       luogo: luogo ? testo(luogo.venue) : '',
@@ -162,22 +245,23 @@ async function importaEventi() {
       siti: [SIGLA],
       vecchio_url: e.url,
     }, await markdown(e.description));
+    nuovi++;
   }
-  console.log(`Eventi: ${eventi.length}`);
+  console.log(`Eventi: ${nuovi} nuovi, ${uniti} già presenti (aggiunto il sito), ${saltati} di prova saltati`);
 }
 
 async function importaPagine() {
-  const pagine = await tutte('pages');
+  const pagine = await tutteLePagine();
   for (const p of pagine) {
-    await salva('pagine-importate', slug(p.slug.replace(/^associazione_|^freudlab_/, '')), {
+    await salva(`${SIGLA}/pagine-importate`, slug(p.slug.replace(/^associazione_|^freudlab_/, '')), {
       titolo: testo(p.title.rendered),
       vecchio_url: p.link,
     }, await markdown(p.content.rendered));
   }
-  console.log(`Pagine: ${pagine.length} (in src/content/pagine-importate, da rivedere a mano)`);
+  console.log(`Pagine: ${pagine.length} (in contenuti/${SIGLA}/pagine-importate, da rivedere a mano)`);
 }
 
-console.log(`Importazione da ${SITO}…`);
+console.log(`Importazione da ${SITO} (${SIGLA})…`);
 await importaPubblicazioni();
 await importaEventi();
 await importaPagine();

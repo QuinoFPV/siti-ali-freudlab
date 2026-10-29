@@ -1,0 +1,27 @@
+/* Colori del Laboratorio freudiano: il blu del logo, con giallo e rosso del nodo borromeo come richiami */
+:root {
+  --accento: #0d3b70;
+  --accento-scuro: #002e5d;
+  --accento-chiaro: #e9eff7;
+  --nodo-giallo: #f2c500;
+  --nodo-rosso: #d7191f;
+  --nodo-blu: #002e5d;
+  --carta: #f6f7f9;
+  --linea: #e1e5eb;
+}
+
+.testata-pagina {
+  background: var(--carta) url('/uploads/freudlab/2021/02/header-bg-scaled-2-1.jpg') center / cover no-repeat;
+  position: relative;
+}
+.testata-pagina::after {
+  content: ''; position: absolute; inset: 0; background: rgb(246 247 249 / .82);
+}
+.testata-pagina > * { position: relative; z-index: 1; }
+
+/* Tre anelli: piccolo segno grafico ripreso dal logo */
+.nodo { display: inline-flex; gap: 0; align-items: center; height: 14px; }
+.nodo i { width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid; margin-right: -5px; }
+.nodo i:nth-child(1) { border-color: var(--nodo-giallo); }
+.nodo i:nth-child(2) { border-color: var(--nodo-blu); }
+.nodo i:nth-child(3) { border-color: var(--nodo-rosso); }

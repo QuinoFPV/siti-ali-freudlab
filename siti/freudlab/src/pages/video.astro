@@ -1,0 +1,35 @@
+---
+import Pagina from '../layouts/Pagina.astro';
+import { video } from '@impostazioni/video.json';
+---
+<Pagina titolo="Video" sottotitolo="Conferenze, presentazioni di libri e cicli di incontri, su YouTube.">
+  <section class="sezione">
+    <div class="contenitore">
+      <ul class="video">
+        {video.map((v) => (
+          <li>
+            <a href={`https://www.youtube.com/watch?v=${v.youtube}`} rel="noopener">
+              <span class="anteprima">
+                <img src={`https://i.ytimg.com/vi/${v.youtube}/hqdefault.jpg`} alt="" loading="lazy" width="480" height="360" />
+                <span class="play" aria-hidden="true">▶</span>
+              </span>
+              <strong>{v.titolo}</strong>
+            </a>
+            <p>{v.nota}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Pagina>
+
+<style>
+  .video { list-style: none; padding: 0; margin: 0; display: grid; gap: 28px 24px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .video a { display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: var(--inchiostro); }
+  .anteprima { position: relative; display: block; border-radius: var(--raggio); overflow: hidden; background: var(--carta); }
+  .anteprima img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .2s; }
+  .video a:hover img { transform: scale(1.03); }
+  .play { position: absolute; inset: 0; margin: auto; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: rgb(0 46 93 / .85); color: #fff; font-size: 1.1rem; padding-left: 4px; }
+  .video strong { font: 600 1.05rem/1.35 var(--titoli); }
+  .video p { margin: 6px 0 0; color: var(--grigio); font-size: 0.9rem; line-height: 1.5; }
+</style>

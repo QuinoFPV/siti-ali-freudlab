@@ -1,0 +1,33 @@
+---
+import Pagina from '../../layouts/Pagina.astro';
+import { CATEGORIE, pubblicazioniDelSito } from '@condiviso/lib/utili';
+
+const tutte = await pubblicazioniDelSito();
+const sezioni = (['editoriale', 'articoli', 'libri', 'seminari', 'dossier'] as const)
+  .map((k) => ({ k, nome: CATEGORIE[k], voci: tutte.filter((p) => p.data.categoria === k) }))
+  .filter((s) => s.voci.length);
+---
+<Pagina titolo="Pubblicazioni" sottotitolo="Editoriali, testi e libri del Laboratorio freudiano e dei suoi docenti.">
+  {sezioni.map((s, i) => (
+    <section class:list={['sezione', { 'sezione--carta': i % 2 === 1 }]} id={s.k}>
+      <div class="contenitore">
+        <h2>{s.nome}</h2>
+        <div class="griglia-schede">
+          {s.voci.map((p) => (
+            <a class="scheda" href={`/pubblicazioni/${p.id}/`}>
+              {p.data.immagine && <img src={p.data.immagine} alt="" loading="lazy" />}
+              <div class="scheda__corpo">
+                <h3>{p.data.titolo}</h3>
+                {p.data.riassunto && s.k !== 'libri' && <p>{p.data.riassunto.slice(0, 140)}…</p>}
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  ))}
+</Pagina>
+
+<style>
+  h2 { margin-top: 0; }
+</style>
