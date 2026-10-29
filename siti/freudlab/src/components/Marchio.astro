@@ -1,0 +1,26 @@
+---
+// Marchio del Laboratorio freudiano ridisegnato per il fondo scuro:
+// i tre anelli del logo e il nome in serif. Il logo originale ha il testo nero.
+interface Props {
+  dimensione?: 'piccola' | 'grande';
+}
+const { dimensione = 'piccola' } = Astro.props;
+---
+<span class:list={['marchio', dimensione]}>
+  <svg viewBox="0 0 64 60" aria-hidden="true">
+    <circle cx="22" cy="22" r="15" stroke="var(--nodo-giallo)" />
+    <circle cx="42" cy="22" r="15" stroke="var(--nodo-blu)" />
+    <circle cx="32" cy="38" r="15" stroke="var(--nodo-rosso)" />
+  </svg>
+  <span class="nome">Laboratorio freudiano<br /><em>Milano</em></span>
+</span>
+
+<style>
+  .marchio { display: inline-flex; align-items: center; gap: 10px; color: var(--inchiostro); }
+  svg { width: 40px; height: auto; flex: none; }
+  circle { fill: none; stroke-width: 4.5; }
+  .nome { font: 560 1.08rem/1.05 var(--titoli); letter-spacing: -0.01em; }
+  em { font-weight: 400; color: var(--accento); }
+  .grande svg { width: 54px; }
+  .grande .nome { font-size: 1.35rem; }
+</style>

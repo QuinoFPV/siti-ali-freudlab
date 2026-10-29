@@ -1,10 +1,3 @@
-@import '@fontsource/montserrat/500.css';
-@import '@fontsource/montserrat/600.css';
-@import '@fontsource/montserrat/700.css';
-@import '@fontsource/open-sans/400.css';
-@import '@fontsource/open-sans/400-italic.css';
-@import '@fontsource/open-sans/600.css';
-
 :root {
   --accento: #8f1d21;
   --accento-scuro: #6b1417;
@@ -15,6 +8,11 @@
   --linea: #e6e1dc;
   --carta: #faf8f5;
   --bianco: #fff;
+  /* Superfici: i siti possono cambiarle (es. tema scuro) */
+  --fondo: #fff;
+  --superficie: #fff;
+  --su-accento: #fff;
+  --bordo-campo: #cfc8c1;
   --titoli: 'Montserrat', system-ui, sans-serif;
   --corpo: 'Open Sans', system-ui, sans-serif;
   --larghezza: 1160px;
@@ -27,7 +25,7 @@ body {
   margin: 0;
   font: 400 17px/1.7 var(--corpo);
   color: var(--testo);
-  background: var(--bianco);
+  background: var(--fondo);
   overflow-wrap: break-word;
 }
 img { max-width: 100%; height: auto; display: block; }
@@ -67,13 +65,13 @@ p { margin: 0 0 1.1em; }
   font: 600 0.85rem/1 var(--titoli);
   letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none;
   padding: 15px 24px; border-radius: var(--raggio);
-  background: var(--accento); color: var(--bianco);
+  background: var(--accento); color: var(--su-accento);
   border: 2px solid var(--accento);
   transition: background .15s, color .15s;
 }
-.bottone:hover { background: var(--accento-scuro); border-color: var(--accento-scuro); color: var(--bianco); }
+.bottone:hover { background: var(--accento-scuro); border-color: var(--accento-scuro); color: var(--su-accento); }
 .bottone--chiaro { background: transparent; color: var(--accento); }
-.bottone--chiaro:hover { background: var(--accento); color: var(--bianco); }
+.bottone--chiaro:hover { background: var(--accento); color: var(--su-accento); }
 .bottone--bianco { background: var(--bianco); color: var(--accento); border-color: var(--bianco); }
 .bottone--bianco:hover { background: transparent; color: var(--bianco); border-color: var(--bianco); }
 
@@ -102,7 +100,7 @@ p { margin: 0 0 1.1em; }
 .griglia-schede { display: grid; gap: 24px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 .scheda {
   display: flex; flex-direction: column;
-  background: var(--bianco); border: 1px solid var(--linea); border-radius: var(--raggio);
+  background: var(--superficie); border: 1px solid var(--linea); border-radius: var(--raggio);
   text-decoration: none; color: inherit; overflow: hidden;
   transition: border-color .15s, transform .15s, box-shadow .15s;
 }

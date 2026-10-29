@@ -1,120 +1,147 @@
 ---
+import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import Nodo from '../components/Nodo.astro';
 import ProssimiEventi from '@condiviso/components/ProssimiEventi.astro';
 import ModuloContatti from '@condiviso/components/ModuloContatti.astro';
 import home from '@impostazioni/home.json';
 import sito from '@impostazioni/sito.json';
-import { md, CATEGORIE, pubblicazioniDelSito } from '@condiviso/lib/utili';
+import { md, CATEGORIE, dataBreve, pubblicazioniDelSito } from '@condiviso/lib/utili';
 
 const pubblicazioni = await pubblicazioniDelSito();
-const ultime = pubblicazioni.filter((p) => p.data.categoria !== 'libri').slice(0, 3);
+const testi = pubblicazioni.filter((p) => p.data.categoria !== 'libri').slice(0, 4);
 const libri = pubblicazioni.filter((p) => p.data.categoria === 'libri' && p.data.immagine).slice(0, 4);
 
+// Monte ore annuo: le tre parti in proporzione sulle 500 ore
 const ore = [
-  { numero: 105, nome: 'insegnamenti teorici' },
-  { numero: 245, nome: 'insegnamenti clinici' },
-  { numero: 150, nome: 'tirocinio' },
+  { numero: 105, nome: 'Insegnamenti teorici', colore: 'var(--nodo-giallo)' },
+  { numero: 245, nome: 'Insegnamenti clinici', colore: 'var(--nodo-blu)' },
+  { numero: 150, nome: 'Tirocinio', colore: 'var(--nodo-rosso)' },
 ];
+const totale = ore.reduce((s, o) => s + o.numero, 0);
+
+// I quattro anni, dal piano di studi: titoli delle sezioni e primi insegnamenti di ciascuna
+const piano = (await getEntry('pagine', 'piano-di-studi'))!;
+const anni = [...piano.body!.matchAll(/^## (\S+ anno)\n\n((?:- .*\n?)+)/gm)].map((m) => ({
+  nome: m[1],
+  materie: m[2].trim().split('\n').map((r) => r.replace(/^- /, '')),
+}));
 ---
 <Base>
-  <section class="eroe">
-    <div class="contenitore eroe__griglia">
-      <div class="eroe__testo">
-        <span class="nodo" aria-hidden="true"><i></i><i></i><i></i></span>
-        <h1>{home.titolo}</h1>
-        <p class="eroe__sotto">{home.sottotitolo}</p>
-        <div class="eroe__azioni">
-          <a class="bottone" href="/la-scuola/">La scuola</a>
-          <a class="bottone bottone--chiaro" href="/ammissione/">Come iscriversi</a>
+  <section class="apertura">
+    <div class="contenitore apertura__griglia">
+      <div class="apertura__testo">
+        <h1>Laboratorio freudiano <span>Milano</span></h1>
+        <p class="apertura__sotto">{home.sottotitolo}</p>
+        <div class="apertura__azioni">
+          <a class="bottone" href="/ammissione/">Come si accede alla scuola</a>
+          <a class="bottone bottone--chiaro" href="/appuntamenti/">Seminari aperti</a>
         </div>
       </div>
-      <div class="eroe__immagine">
-        <img src={home.immagine} alt="Jacques Lacan e Sigmund Freud" width="800" height="1132" />
+      <div class="apertura__nodo">
+        <Nodo />
       </div>
     </div>
   </section>
 
-  <section class="sezione">
-    <div class="contenitore due-colonne">
-      <div>
-        <p class="occhiello">La scuola</p>
-        <h2>{home.scuola_titolo}</h2>
-        <div set:html={md(home.scuola_testo)} />
-        <a class="bottone bottone--chiaro" href="/la-scuola/">Scopri la scuola</a>
+  <section class="sezione monte-ore">
+    <div class="contenitore">
+      <div class="intestazione-blocco">
+        <h2>Quattro anni, {totale} ore l’anno</h2>
+        <p>Il percorso alterna lo studio dei testi di Freud e di Lacan alla clinica e al tirocinio nelle istituzioni convenzionate.</p>
       </div>
-      <img class="foto" src={home.scuola_immagine} alt="Una lezione al Laboratorio freudiano" loading="lazy" width="800" height="644" />
+      <div class="barra" role="img" aria-label={ore.map((o) => `${o.nome}: ${o.numero} ore`).join(', ')}>
+        {ore.map((o) => <span style={`flex: ${o.numero}; background: ${o.colore}`}></span>)}
+      </div>
+      <dl class="legenda">
+        {ore.map((o) => (
+          <div style={`--c: ${o.colore}; flex: ${o.numero}`}>
+            <dt>{o.nome}</dt>
+            <dd>{o.numero} <small>ore</small></dd>
+          </div>
+        ))}
+      </dl>
+
+      <ol class="anni">
+        {anni.map((a) => (
+          <li>
+            <h3>{a.nome}</h3>
+            <ul>{a.materie.slice(0, 4).map((m) => <li>{m}</li>)}</ul>
+          </li>
+        ))}
+      </ol>
+      <p class="tutto"><a href="/piano-di-studi/">Il piano di studi completo</a></p>
+    </div>
+  </section>
+
+  <section class="sezione scuola">
+    <div class="contenitore scuola__griglia">
+      <figure>
+        <img src={home.scuola_immagine} alt="Marisa Fiumanò durante una lezione, davanti a uno schema alla lavagna" loading="lazy" width="800" height="644" />
+        <figcaption>Una lezione nella sede di piazza Aspromonte</figcaption>
+      </figure>
+      <div>
+        <h2>{home.scuola_titolo}</h2>
+        <div class="testo" set:html={md(home.scuola_testo)} />
+        <a class="bottone bottone--chiaro" href="/la-scuola/">La scuola</a>
+      </div>
     </div>
   </section>
 
   <section class="sezione sezione--carta">
-    <div class="contenitore">
-      <p class="occhiello">Piano di studi</p>
-      <h2 class="senza-margine">Quattro anni, 500 ore l’anno</h2>
-      <ul class="ore">
-        {ore.map((o) => (
-          <li><strong>{o.numero}</strong><span>ore di {o.nome}</span></li>
-        ))}
-      </ul>
-      <p><a href="/piano-di-studi/">Gli insegnamenti anno per anno →</a></p>
-    </div>
-  </section>
-
-  <section class="sezione">
-    <div class="contenitore due-colonne">
+    <div class="contenitore calendario">
       <div>
-        <p class="occhiello">Calendario</p>
         <h2>Prossimi appuntamenti</h2>
-        <p>Insegnamenti del sabato, seminari e giornate di studio del Laboratorio freudiano e dell’Associazione lacaniana internazionale – Milano.</p>
-        <p><a href="/appuntamenti/">Tutti gli appuntamenti →</a><br /><a href="/appuntamenti.ics">Aggiungi al tuo calendario</a></p>
+        <p>Insegnamenti del sabato, seminari e giornate di studio, insieme all’Associazione lacaniana internazionale – Milano. Molti sono aperti anche a chi non è iscritto alla scuola.</p>
+        <p class="link"><a href="/appuntamenti/">Calendario e archivio</a><br /><a href="/appuntamenti.ics">Aggiungi al tuo calendario</a></p>
       </div>
       <ProssimiEventi limite={4} />
     </div>
   </section>
 
   <section class="citazione">
-    <div class="stretto">
+    <div class="contenitore citazione__griglia">
       <blockquote>
         <p>{home.citazione}</p>
         <footer>{home.citazione_autore}</footer>
       </blockquote>
+      <img src={home.immagine} alt="Jacques Lacan e Sigmund Freud" loading="lazy" width="800" height="1132" />
     </div>
   </section>
 
   <section class="sezione">
-    <div class="contenitore">
-      <p class="occhiello">{CATEGORIE.editoriale}</p>
-      <h2 class="senza-margine">Ultimi testi</h2>
-      <div class="griglia-schede spazio">
-        {ultime.map((p) => (
-          <a class="scheda" href={`/pubblicazioni/${p.id}/`}>
-            {p.data.immagine && <img src={p.data.immagine} alt="" loading="lazy" />}
-            <div class="scheda__corpo">
-              <span class="etichetta">{CATEGORIE[p.data.categoria]}</span>
-              <h3>{p.data.titolo}</h3>
-            </div>
-          </a>
-        ))}
+    <div class="contenitore pubblicazioni">
+      <div>
+        <h2>{CATEGORIE.editoriale}</h2>
+        <ul class="testi">
+          {testi.map((p) => (
+            <li>
+              <a href={`/pubblicazioni/${p.id}/`}>
+                <span class="testi__titolo">{p.data.titolo}</span>
+                <span class="testi__meta">{CATEGORIE[p.data.categoria]}, {dataBreve(p.data.data)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="link"><a href="/pubblicazioni/">Tutti i testi</a></p>
       </div>
-      <div class="collana">
-        <div>
-          <p class="occhiello">Edizioni Mimesis</p>
-          <h3>Collana “Nodi”</h3>
-          <p>Diretta da Marisa Fiumanò: i punti di intersezione fra la clinica e la società contemporanea.</p>
-          <a href="/collana-nodi/">I libri della collana →</a>
-        </div>
+      <aside class="collana">
+        <h2>Collana “Nodi”</h2>
+        <p>Diretta da Marisa Fiumanò per Mimesis: i punti di intersezione fra la clinica e la società contemporanea.</p>
         <div class="copertine">
           {libri.map((l) => <a href={`/pubblicazioni/${l.id}/`}><img src={l.data.immagine} alt={l.data.titolo} loading="lazy" /></a>)}
         </div>
-      </div>
+        <p class="link"><a href="/collana-nodi/">I libri della collana</a></p>
+      </aside>
     </div>
   </section>
 
   <section class="sezione sezione--carta">
-    <div class="contenitore due-colonne">
+    <div class="contenitore contatti">
       <div>
-        <p class="occhiello">Contatti</p>
         <h2>Scrivici</h2>
-        <p>La sede didattica della scuola è in {sito.indirizzo}.<br /><span class="grigio">{sito.come_arrivare}</span></p>
+        <p>Per informazioni sulla scuola, sull’ammissione o per iscriverti ai seminari.</p>
+        <p>{sito.indirizzo}<br /><span class="grigio">{sito.come_arrivare}</span></p>
         <p>Tel. <a href={`tel:${sito.telefono.replace(/\s/g, '')}`}>{sito.telefono}</a><br /><a href={`mailto:${sito.email}`}>{sito.email}</a></p>
       </div>
       <ModuloContatti oggetto="Richiesta dal sito del Laboratorio freudiano" />
@@ -123,41 +150,92 @@ const ore = [
 </Base>
 
 <style>
-  .eroe { background: #e9e7e3 url('/uploads/freudlab/2021/02/header-bg-scaled-2-1.jpg') center / cover no-repeat; border-bottom: 1px solid var(--linea); }
-  .eroe__griglia { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: clamp(32px, 6vw, 80px); align-items: center; padding: clamp(40px, 7vw, 88px) 0; }
-  .eroe h1 { text-transform: uppercase; font-size: clamp(2.1rem, 4.6vw, 3.4rem); line-height: 1.08; margin: 20px 0 16px; color: var(--accento-scuro); }
-  .eroe__sotto { font-size: 1.15rem; max-width: 520px; color: var(--inchiostro); }
-  .eroe__azioni { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-  .eroe__immagine img { width: 100%; max-height: 600px; object-fit: cover; object-position: top; border-radius: var(--raggio); box-shadow: 0 24px 60px rgb(0 0 0 / .18); }
+  /* Apertura: il nome della scuola e il nodo borromeo */
+  .apertura { background: var(--fondo); --sfondo-nodo: var(--fondo); overflow: hidden; border-bottom: 1px solid var(--linea); }
+  .apertura__griglia { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: clamp(24px, 5vw, 72px); align-items: center; padding: clamp(48px, 8vw, 104px) 0 clamp(40px, 6vw, 80px); }
+  .apertura h1 { font-size: clamp(3rem, 7.4vw, 6rem); line-height: 0.98; font-weight: 520; letter-spacing: -0.025em; margin: 0; color: var(--inchiostro); font-variation-settings: 'opsz' 72; }
+  .apertura h1 span { display: block; font-style: italic; font-weight: 400; color: var(--accento); }
+  .apertura__sotto { font-size: 1.2rem; line-height: 1.55; max-width: 34ch; margin: 28px 0 0; color: var(--testo); }
+  .apertura__azioni { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+  .apertura__nodo { max-width: 520px; justify-self: center; width: 100%; }
 
-  .due-colonne { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 72px); align-items: center; }
-  .due-colonne h2 { margin-top: 0; }
-  .foto { width: 100%; border-radius: var(--raggio); }
-  .senza-margine { margin-top: 0; }
-  .grigio { color: var(--grigio); font-size: 0.95rem; }
-  .spazio { margin-top: 28px; }
+  /* Monte ore e anni */
+  .intestazione-blocco { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: end; margin-bottom: 32px; }
+  .intestazione-blocco h2 { margin: 0; }
+  .intestazione-blocco p { margin: 0; color: var(--grigio); max-width: 48ch; }
+  .barra { display: flex; height: 14px; gap: 4px; }
+  .barra span { border-radius: 2px; }
+  .legenda { display: flex; gap: 4px; margin: 12px 0 0; }
+  .legenda div { min-width: 0; border-left: 3px solid var(--c); padding-left: 10px; }
+  .legenda dt { font-size: 0.9rem; color: var(--grigio); }
+  .legenda dd { margin: 0; font: 500 2rem/1.1 var(--titoli); color: var(--inchiostro); font-variant-numeric: tabular-nums; }
+  .legenda small { font-size: 1rem; color: var(--grigio); }
 
-  .ore { list-style: none; padding: 0; margin: 28px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .ore li { display: flex; flex-direction: column; gap: 4px; padding: 24px; background: #fff; border-radius: var(--raggio); border-top: 4px solid var(--nodo-blu); }
-  .ore li:nth-child(1) { border-top-color: var(--nodo-giallo); }
-  .ore li:nth-child(3) { border-top-color: var(--nodo-rosso); }
-  .ore strong { font: 700 2.6rem/1 var(--titoli); color: var(--accento-scuro); font-variant-numeric: tabular-nums; }
-  .ore span { color: var(--grigio); }
+  .anni { list-style: none; padding: 0; margin: 56px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--inchiostro); }
+  .anni > li { padding: 20px 20px 0 0; }
+  .anni > li + li { padding-left: 20px; border-left: 1px solid var(--linea); }
+  .anni h3 { margin: 0 0 10px; font-size: 1.35rem; font-style: italic; font-weight: 450; }
+  .anni ul { list-style: none; padding: 0; margin: 0; font-size: 0.95rem; color: var(--testo); }
+  .anni ul li { padding: 5px 0; border-bottom: 1px dotted var(--linea); }
+  .tutto { margin: 24px 0 0; }
 
-  .citazione { background: var(--accento-scuro); color: #fff; padding: clamp(56px, 8vw, 96px) 0; }
+  /* La scuola */
+  .scuola { padding-top: 0; }
+  .scuola__griglia { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
+  .scuola figure { margin: 0; }
+  .scuola img { width: 100%; border-radius: 2px; }
+  .scuola figcaption { margin-top: 10px; font: italic 400 0.98rem/1.4 var(--titoli); color: var(--grigio); }
+  .scuola h2 { margin: 0 0 20px; }
+  .scuola .testo { font: 400 1.12rem/1.7 var(--titoli); }
+
+  /* Calendario */
+  .calendario { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(32px, 6vw, 72px); align-items: start; }
+  .calendario h2 { margin-top: 0; }
+  .link { margin-top: 20px; }
+
+  /* Citazione */
+  .citazione { background: var(--profondo); color: var(--inchiostro); }
+  .citazione__griglia { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr); gap: clamp(32px, 6vw, 80px); align-items: center; padding: clamp(56px, 8vw, 104px) 0; }
   .citazione blockquote { margin: 0; }
-  .citazione p { font: 500 clamp(1.2rem, 2.4vw, 1.55rem)/1.55 var(--titoli); }
-  .citazione footer { margin-top: 20px; color: #b9c9dd; font-size: 0.95rem; }
+  .citazione p { font: italic 400 clamp(1.4rem, 2.6vw, 2rem)/1.45 var(--titoli); margin: 0; text-wrap: pretty; }
+  .citazione footer { margin-top: 24px; color: var(--grigio); }
+  .citazione img { width: 100%; max-height: 420px; object-fit: cover; object-position: top; filter: grayscale(1) contrast(1.05); border-radius: 2px; }
 
-  .collana { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 40px; align-items: center; margin-top: 56px; padding: 32px; border: 1px solid var(--linea); border-radius: var(--raggio); }
-  .collana h3 { margin: 0 0 8px; font-size: 1.4rem; }
-  .copertine { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .copertine img { aspect-ratio: 16 / 10; object-fit: cover; border-radius: 3px; border: 1px solid var(--linea); }
+  /* Testi e collana */
+  .pubblicazioni { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: clamp(32px, 6vw, 80px); align-items: start; }
+  .pubblicazioni h2 { margin-top: 0; }
+  .testi { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--inchiostro); }
+  .testi li { border-bottom: 1px solid var(--linea); }
+  .testi a { display: flex; flex-direction: column; gap: 4px; padding: 18px 0; text-decoration: none; }
+  .testi__titolo { font: 500 1.35rem/1.25 var(--titoli); color: var(--inchiostro); }
+  .testi a:hover .testi__titolo { color: var(--accento); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+  .testi__meta { font-size: 0.9rem; color: var(--grigio); }
+  .collana { background: var(--carta); padding: 28px; border-radius: 2px; }
+  .collana h2 { font-size: 1.6rem; }
+  .collana p { color: var(--testo); }
+  .copertine { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+  .copertine img { aspect-ratio: 16 / 10; object-fit: cover; border-radius: 2px; }
 
+  /* Contatti */
+  .contatti { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(32px, 6vw, 72px); }
+  .contatti h2 { margin-top: 0; }
+  .grigio { color: var(--grigio); font-size: 0.95rem; }
+
+  @media (max-width: 960px) {
+    .anni { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .anni > li:nth-child(3) { padding-left: 0; border-left: 0; }
+    .anni > li { padding-bottom: 20px; }
+  }
   @media (max-width: 860px) {
-    .eroe__griglia, .due-colonne, .collana { grid-template-columns: 1fr; }
-    .eroe__immagine img { max-height: 340px; }
-    .ore { grid-template-columns: 1fr; }
-    .copertine { grid-template-columns: repeat(2, 1fr); }
+    .apertura__griglia, .intestazione-blocco, .scuola__griglia, .calendario, .citazione__griglia, .pubblicazioni, .contatti { grid-template-columns: 1fr; }
+    .apertura__nodo { max-width: 360px; order: -1; }
+    .citazione img { max-height: 280px; }
+  }
+  @media (max-width: 560px) {
+    .anni { grid-template-columns: 1fr; }
+    .anni > li + li { padding-left: 0; border-left: 0; }
+    .legenda { flex-direction: column; gap: 12px; }
+    .legenda div { flex: none !important; display: flex; justify-content: space-between; align-items: baseline; }
+    .legenda dd { font-size: 1.5rem; }
   }
 </style>

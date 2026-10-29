@@ -1,27 +1,120 @@
-/* Colori del Laboratorio freudiano: il blu del logo, con giallo e rosso del nodo borromeo come richiami */
+/* Laboratorio freudiano: impostazione editoriale, da libro di psicoanalisi.
+   Il serif Newsreader porta titoli e testi lunghi, lo Schibsted Grotesk l'interfaccia.
+   Giallo, blu e rosso vengono dal nodo borromeo del logo e si usano solo dove
+   distinguono qualcosa (i tre anelli, le tre parti del monte ore). */
 :root {
-  --accento: #0d3b70;
-  --accento-scuro: #002e5d;
-  --accento-chiaro: #e9eff7;
-  --nodo-giallo: #f2c500;
-  --nodo-rosso: #d7191f;
-  --nodo-blu: #002e5d;
-  --carta: #f6f7f9;
-  --linea: #e1e5eb;
+  --titoli: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
+  --corpo: 'Schibsted Grotesk Variable', 'Helvetica Neue', Arial, sans-serif;
+
+  /* Blu notte: fondo, fasce alterne, superfici dei riquadri */
+  --fondo: #0e1a2e;
+  --carta: #132339;
+  --superficie: #182b46;
+  --profondo: #08111f;
+
+  /* Testi chiari: titoli, corpo, note */
+  --inchiostro: #f3f5f9;
+  --testo: #cdd6e4;
+  --grigio: #94a3ba;
+  --linea: #2a3d5a;
+  --bordo-campo: #3a5070;
+  --bianco: #fff;
+
+  --accento: #8db6ff;
+  --accento-scuro: #b9d1ff;
+  --accento-chiaro: #1d3457;
+  --su-accento: #0e1a2e;
+
+  /* I tre anelli, schiariti quanto basta per staccarsi dal blu notte */
+  --nodo-giallo: #f2c230;
+  --nodo-blu: #4a82e8;
+  --nodo-rosso: #e5503f;
+
+  color-scheme: dark;
 }
 
+body { font-size: 17px; }
+
+h1, h2, h3, h4, h5 {
+  font-weight: 560;
+  letter-spacing: -0.012em;
+  font-variation-settings: 'opsz' 72;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2.4rem, 5.5vw, 3.8rem); line-height: 1.05; }
+h2 { font-size: clamp(1.7rem, 3.2vw, 2.3rem); line-height: 1.15; }
+h3 { font-size: 1.3rem; font-weight: 600; }
+
+/* Occhielli in corsivo, non in maiuscoletto */
+.occhiello {
+  font: italic 450 1.05rem/1.3 var(--titoli);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--accento);
+}
+
+.bottone {
+  font: 600 0.95rem/1 var(--corpo);
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 14px 22px;
+  border-radius: 3px;
+  background: var(--inchiostro);
+  border-color: var(--inchiostro);
+  color: var(--su-accento);
+}
+.bottone:hover { background: var(--nodo-giallo); border-color: var(--nodo-giallo); color: var(--su-accento); }
+.bottone--chiaro { background: transparent; color: var(--inchiostro); border-color: rgb(243 245 249 / .45); }
+.bottone--chiaro:hover { background: var(--inchiostro); color: var(--su-accento); border-color: var(--inchiostro); }
+
+.etichetta {
+  font: 500 0.8rem/1 var(--corpo);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--accento);
+  background: var(--accento-chiaro);
+}
+
+/* I testi lunghi si leggono in serif, come nei libri della collana */
+.prosa {
+  font: 400 1.14rem/1.72 var(--titoli);
+  font-variation-settings: 'opsz' 16;
+  color: var(--testo);
+}
+.prosa h2 { font-size: 1.65rem; border-top-color: var(--linea); }
+.prosa h3 { font-size: 1.3rem; }
+.prosa blockquote {
+  font: italic 450 1.45rem/1.45 var(--titoli);
+  border-left-color: var(--nodo-blu);
+}
+.prosa strong { font-weight: 650; color: var(--inchiostro); }
+
+/* Testata delle pagine interne: carta, titolo grande e il filo a tre colori */
 .testata-pagina {
-  background: var(--carta) url('/uploads/freudlab/2021/02/header-bg-scaled-2-1.jpg') center / cover no-repeat;
+  background: var(--carta);
+  background-image: none;
+  border-bottom: 0;
   position: relative;
 }
 .testata-pagina::after {
-  content: ''; position: absolute; inset: 0; background: rgb(246 247 249 / .82);
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
+  background: linear-gradient(90deg, var(--nodo-giallo) 0 33.33%, var(--nodo-blu) 33.33% 66.66%, var(--nodo-rosso) 66.66%);
 }
-.testata-pagina > * { position: relative; z-index: 1; }
+.testata-pagina h1 { font-size: clamp(2.4rem, 6vw, 4rem); }
+.testata-pagina p { font-size: 1.12rem; }
 
-/* Tre anelli: piccolo segno grafico ripreso dal logo */
-.nodo { display: inline-flex; gap: 0; align-items: center; height: 14px; }
-.nodo i { width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid; margin-right: -5px; }
-.nodo i:nth-child(1) { border-color: var(--nodo-giallo); }
-.nodo i:nth-child(2) { border-color: var(--nodo-blu); }
-.nodo i:nth-child(3) { border-color: var(--nodo-rosso); }
+.scheda { border-radius: 3px; }
+.scheda:hover { box-shadow: none; transform: none; border-color: var(--inchiostro); }
+.scheda__corpo h3 { font-size: 1.22rem; line-height: 1.25; }
+
+/* Modulo contatti: etichette in tondo, non in maiuscolo */
+.modulo label { font: 500 0.95rem/1.2 var(--corpo); letter-spacing: 0; text-transform: none; }
+.modulo input, .modulo textarea { border-radius: 2px; }
+
+/* Date degli appuntamenti in serif */
+.evento__mese { font-family: var(--corpo); letter-spacing: 0.02em; }
+
+/* Immagini con fondo bianco (copertine, locandine): un filo di bordo le stacca dal blu */
+.scheda img, .copertine img, .locandine img { background: var(--superficie); }
+::selection { background: var(--nodo-giallo); color: var(--su-accento); }

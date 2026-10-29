@@ -1,0 +1,101 @@
+---
+// Nodo borromeo: tre anelli intrecciati in modo che, tagliandone uno, gli altri
+// due si sciolgono. Ogni coppia si incrocia due volte e lo stesso anello passa
+// sempre sopra: Immaginario sopra Simbolico, Simbolico sopra Reale, Reale sopra
+// Immaginario. Gli incroci si ottengono ridisegnando l'anello "sopra" in un
+// piccolo cerchio attorno a ciascun punto, con un alone del colore di fondo.
+
+interface Props {
+  etichette?: boolean;
+}
+const { etichette = true } = Astro.props;
+
+const r = 108; // raggio degli anelli
+const d = 118; // distanza tra i centri
+const rho = d / Math.sqrt(3);
+const polare = (gradi: number, dist: number) => {
+  const a = (gradi * Math.PI) / 180;
+  return { x: +(dist * Math.cos(a)).toFixed(2), y: +(dist * Math.sin(a)).toFixed(2) };
+};
+
+const anelli = [
+  { id: 'i', nome: 'Immaginario', colore: 'var(--nodo-giallo)', ...polare(210, rho), angolo: 210 },
+  { id: 's', nome: 'Simbolico', colore: 'var(--nodo-blu)', ...polare(330, rho), angolo: 330 },
+  { id: 'r', nome: 'Reale', colore: 'var(--nodo-rosso)', ...polare(90, rho), angolo: 90 },
+];
+type Anello = (typeof anelli)[number];
+
+function incroci(a: Anello, b: Anello) {
+  const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const dist = Math.hypot(dx, dy);
+  const h = Math.sqrt(r * r - (dist / 2) ** 2);
+  const ux = -dy / dist, uy = dx / dist;
+  return [
+    { x: mx + ux * h, y: my + uy * h },
+    { x: mx - ux * h, y: my - uy * h },
+  ];
+}
+
+const [I, S, R] = anelli;
+// [anello sopra, anello sotto]
+const coppie: [Anello, Anello][] = [[I, S], [S, R], [R, I]];
+const toppe = coppie.flatMap(([sopra, sotto]) => incroci(sopra, sotto).map((p) => ({ sopra, ...p })));
+const raggioToppa = 17;
+// Spazio del disegno: più largo che alto, per far stare le etichette ai lati
+const largo = 315, alto = 250;
+---
+<svg class="nodo-borromeo" viewBox={`${-largo} ${-alto + 20} ${largo * 2} ${alto * 2}`} role="img" aria-labelledby="nodo-titolo">
+  <title id="nodo-titolo">Nodo borromeo: Reale, Simbolico, Immaginario</title>
+  <defs>
+    {toppe.map((t, i) => (
+      <clipPath id={`toppa-${i}`}><circle cx={t.x} cy={t.y} r={raggioToppa} /></clipPath>
+    ))}
+  </defs>
+
+  <g class="anelli">
+    {anelli.map((a) => {
+      // Ogni anello parte un po' spostato verso l'esterno e scivola al suo posto
+      const via = polare(a.angolo, 46);
+      return <circle cx={a.x} cy={a.y} r={r} stroke={a.colore} style={`--dx: ${via.x}px; --dy: ${via.y}px`} />;
+    })}
+  </g>
+
+  <g class="toppe">
+    {toppe.map((t, i) => (
+      <g clip-path={`url(#toppa-${i})`}>
+        <circle class="alone" cx={t.sopra.x} cy={t.sopra.y} r={r} />
+        <circle cx={t.sopra.x} cy={t.sopra.y} r={r} stroke={t.sopra.colore} />
+      </g>
+    ))}
+  </g>
+
+  {etichette && (
+    <g class="etichette">
+      {anelli.map((a) => {
+        // Etichette all'esterno: a sinistra allineate a destra, a destra allineate a sinistra
+        const p = polare(a.angolo, rho + r + 26);
+        const ancora = a.angolo === 90 ? 'middle' : a.angolo < 270 ? 'end' : 'start';
+        return <text x={p.x} y={a.angolo === 90 ? p.y + 6 : p.y} text-anchor={ancora} dominant-baseline="middle">{a.nome}</text>;
+      })}
+    </g>
+  )}
+</svg>
+
+<style>
+  .nodo-borromeo { width: 100%; height: auto; overflow: visible; }
+  circle { fill: none; stroke-width: 20; }
+  .alone { stroke: var(--sfondo-nodo, var(--carta)); stroke-width: 34; }
+  /* Un solo movimento all'apertura: gli anelli si avvicinano e si annodano.
+     Il primo fotogramma mostra già i tre anelli, solo più distanti. */
+  .anelli circle { animation: annoda 1.3s cubic-bezier(.5, 0, .2, 1) .2s backwards; }
+  .toppe { animation: compare .35s ease-out 1.35s backwards; }
+  text { font: italic 400 22px var(--titoli); fill: var(--grigio); }
+
+  @keyframes annoda { from { transform: translate(var(--dx), var(--dy)); } to { transform: none; } }
+  @keyframes compare { from { opacity: 0; } to { opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .anelli circle, .toppe { animation: none; }
+  }
+</style>
