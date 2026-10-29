@@ -1,0 +1,68 @@
+---
+import { getCollection } from 'astro:content';
+import Pagina from '../../layouts/Pagina.astro';
+import { CATEGORIE } from '../../lib/utili';
+import { locandine } from '../../content/impostazioni/locandine.json';
+import sito from '../../content/impostazioni/sito.json';
+
+const tutte = (await getCollection('pubblicazioni')).sort((a, b) => b.data.data.localeCompare(a.data.data));
+const sezioni = Object.entries(CATEGORIE).map(([k, nome]) => ({ k, nome, voci: tutte.filter((p) => p.data.categoria === k) }));
+---
+<Pagina titolo="Pubblicazioni" sottotitolo="Libri, articoli, seminari e dossier dei soci e degli ospiti dell’Associazione.">
+  <nav class="schede-nav" aria-label="Sezioni">
+    <div class="contenitore">
+      {sezioni.map((s) => <a href={`#${s.k}`}>{s.nome} <span>{s.voci.length}</span></a>)}
+      <a href="#locandine">Locandine</a>
+    </div>
+  </nav>
+
+  {sezioni.map((s, i) => (
+    <section class:list={['sezione', { 'sezione--carta': i % 2 === 1 }]} id={s.k}>
+      <div class="contenitore">
+        <h2>{s.nome}</h2>
+        {s.k === 'libri' && (
+          <p class="nota">Per informazioni o per l’acquisto dei libri: tel. {sito.telefono}, <a href={`mailto:${sito.email}`}>{sito.email}</a>.</p>
+        )}
+        <div class="griglia-schede">
+          {s.voci.map((p) => (
+            <a class="scheda" href={`/pubblicazioni/${p.id}/`}>
+              {p.data.immagine
+                ? <img src={p.data.immagine} alt="" loading="lazy" />
+                : <div class="segnaposto" aria-hidden="true">{s.nome}</div>}
+              <div class="scheda__corpo">
+                <h3>{p.data.titolo}</h3>
+                {p.data.riassunto && s.k !== 'libri' && <p>{p.data.riassunto.slice(0, 140)}…</p>}
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <section class="sezione sezione--carta" id="locandine">
+    <div class="contenitore">
+      <h2>Locandine</h2>
+      <div class="locandine">
+        {locandine.map((l) => (
+          <a href={l.immagine}><img src={l.immagine} alt={l.titolo} loading="lazy" /><span>{l.titolo}</span></a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Pagina>
+
+<style>
+  .schede-nav { position: sticky; top: 77px; z-index: 10; background: #fff; border-bottom: 1px solid var(--linea); }
+  .schede-nav .contenitore { display: flex; gap: 4px; overflow-x: auto; }
+  .schede-nav a { padding: 14px 14px; white-space: nowrap; text-decoration: none; font: 600 0.82rem/1 var(--titoli); letter-spacing: 0.06em; text-transform: uppercase; color: var(--inchiostro); }
+  .schede-nav a:hover { color: var(--bordeaux); }
+  .schede-nav span { color: var(--grigio); font-weight: 500; }
+  section h2 { margin-top: 0; }
+  .nota { color: var(--grigio); }
+  .segnaposto { aspect-ratio: 16 / 10; display: grid; place-items: center; background: var(--bordeaux-chiaro); color: var(--bordeaux); font: 700 1.1rem/1 var(--titoli); text-transform: uppercase; letter-spacing: 0.12em; }
+  .locandine { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+  .locandine a { display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: var(--inchiostro); font-size: 0.92rem; }
+  .locandine img { aspect-ratio: 3 / 4; object-fit: cover; border: 1px solid var(--linea); border-radius: var(--raggio); }
+  @media (max-width: 1080px) { .schede-nav { top: 77px; } }
+</style>

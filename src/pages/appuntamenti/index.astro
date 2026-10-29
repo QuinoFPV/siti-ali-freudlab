@@ -1,0 +1,46 @@
+---
+import Pagina from '../../layouts/Pagina.astro';
+import ProssimiEventi from '../../components/ProssimiEventi.astro';
+import EventoRiga from '../../components/EventoRiga.astro';
+import { eventiDelSito } from '../../lib/utili';
+
+const adesso = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Rome' }).replace(' ', 'T').slice(0, 16);
+const passati = (await eventiDelSito()).filter((e) => (e.data.fine ?? e.data.inizio) < adesso).reverse();
+const perAnno = Map.groupBy(passati, (e) => e.data.inizio.slice(0, 4));
+---
+<Pagina titolo="Appuntamenti" sottotitolo="Seminari, giornate di studio e presentazioni dell’Associazione.">
+  <section class="sezione">
+    <div class="contenitore">
+      <div class="intestazione-lista">
+        <h2>In programma</h2>
+        <a class="bottone bottone--chiaro" href="/appuntamenti.ics">Iscriviti al calendario</a>
+      </div>
+      <ProssimiEventi />
+    </div>
+  </section>
+
+  <section class="sezione sezione--carta" id="archivio">
+    <div class="contenitore">
+      <h2>Archivio</h2>
+      <nav class="anni" aria-label="Anni">
+        {[...perAnno.keys()].map((a) => <a href={`#anno-${a}`}>{a}</a>)}
+      </nav>
+      {[...perAnno].map(([a, eventi]) => (
+        <section class="anno" id={`anno-${a}`}>
+          <h3>{a}</h3>
+          <div class="lista">{eventi.map((e) => <EventoRiga evento={e} />)}</div>
+        </section>
+      ))}
+    </div>
+  </section>
+</Pagina>
+
+<style>
+  .intestazione-lista { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
+  .intestazione-lista h2 { margin: 0; }
+  #archivio h2 { margin-top: 0; }
+  .anni { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .anni a { padding: 6px 14px; border: 1px solid var(--linea); border-radius: 99px; background: #fff; text-decoration: none; font: 600 0.85rem/1.4 var(--titoli); }
+  .anno h3 { margin: 40px 0 16px; color: var(--bordeaux); }
+  .lista { display: grid; gap: 10px; }
+</style>

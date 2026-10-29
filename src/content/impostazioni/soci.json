@@ -1,0 +1,54 @@
+{
+  "soci": [
+    {
+      "nome": "Alessandro Bertoloni",
+      "email": "alessandrobertoloni@libero.it"
+    },
+    {
+      "nome": "Silvia Biancardi",
+      "email": "biancardisilvia@libero.it"
+    },
+    {
+      "nome": "Marco Cambi",
+      "email": "marco.cambi@gmail.com"
+    },
+    {
+      "nome": "Pierfrancesco Del Re",
+      "email": "pier.delre@gmail.com"
+    },
+    {
+      "nome": "Marisa Fiumanò",
+      "email": "lfiumano@tiscali.it"
+    },
+    {
+      "nome": "Paola Giovani",
+      "email": "pa.giovani@alice.it"
+    },
+    {
+      "nome": "Jean-Paul Hiltenbrand",
+      "citta": "Grenoble"
+    },
+    {
+      "nome": "Lucia Leonardi",
+      "email": "lucialeonardi085@gmail.com"
+    },
+    {
+      "nome": "Elisabetta Piras",
+      "email": "psy.piras@gmail.com"
+    },
+    {
+      "nome": "Paolo Scarano",
+      "email": "paoloscarano20@gmail.com"
+    },
+    {
+      "nome": "Christian Rey",
+      "email": "77christianrey@gmail.com",
+      "citta": "Chambéry"
+    },
+    {
+      "nome": "Françoise Rey",
+      "email": "fr.rey.sentenac@gmail.com",
+      "citta": "Grenoble – Chambéry"
+    }
+  ]
+}

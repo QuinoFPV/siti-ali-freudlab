@@ -1,0 +1,37 @@
+---
+import EventoRiga from './EventoRiga.astro';
+import { eventiDelSito } from '../lib/utili';
+
+interface Props {
+  limite?: number;
+}
+const { limite = 50 } = Astro.props;
+
+// Ora di Milano al momento della pubblicazione. Nel browser lo script
+// nasconde anche gli eventi passati dopo l'ultima pubblicazione.
+const adesso = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Rome' }).replace(' ', 'T').slice(0, 16);
+const futuri = (await eventiDelSito()).filter((e) => (e.data.fine ?? e.data.inizio) >= adesso).slice(0, limite);
+---
+<div class="prossimi" data-prossimi>
+  {futuri.map((e) => <EventoRiga evento={e} />)}
+  <p class="prossimi__vuoto" data-vuoto hidden={futuri.length > 0}>
+    Al momento non ci sono appuntamenti in programma. <a href="/appuntamenti/#archivio">Consulta l’archivio</a>.
+  </p>
+</div>
+
+<script>
+  const adesso = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Rome' }).replace(' ', 'T').slice(0, 16);
+  document.querySelectorAll<HTMLElement>('[data-prossimi]').forEach((lista) => {
+    let visibili = 0;
+    lista.querySelectorAll<HTMLElement>('[data-fine]').forEach((el) => {
+      if ((el.dataset.fine ?? '') < adesso) el.classList.add('nascosto');
+      else visibili++;
+    });
+    lista.querySelector<HTMLElement>('[data-vuoto]')!.hidden = visibili > 0;
+  });
+</script>
+
+<style>
+  .prossimi { display: grid; gap: 12px; }
+  .prossimi__vuoto { padding: 24px; background: #fff; border: 1px dashed #cfc8c1; border-radius: var(--raggio); color: var(--grigio); margin: 0; }
+</style>

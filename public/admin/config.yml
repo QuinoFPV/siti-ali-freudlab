@@ -1,0 +1,190 @@
+# Configurazione del pannello di modifica (Sveltia CMS)
+# Ogni "collection" è una sezione del pannello; ogni "field" è un campo del modulo.
+
+backend:
+  name: github
+  repo: PROPRIETARIO/ali-milano-demo # da aggiornare quando il repository è su GitHub
+  branch: main
+  commit_messages:
+    create: 'Nuovo {{collection}}: {{slug}}'
+    update: 'Modifica {{collection}}: {{slug}}'
+    delete: 'Eliminato {{collection}}: {{slug}}'
+    uploadMedia: 'Caricato {{path}}'
+    deleteMedia: 'Eliminato {{path}}'
+
+site_url: https://ali-milano.it
+logo_url: /uploads/2022/01/cropped-FAVICON-192x192.jpg
+
+# Dove finiscono immagini e PDF caricati dal pannello
+media_folder: public/uploads/pannello
+public_folder: /uploads/pannello
+
+collections:
+  - name: eventi
+    label: Appuntamenti
+    label_singular: Appuntamento
+    description: Seminari, giornate di studio e presentazioni. Compaiono nel calendario e nella home.
+    folder: src/content/eventi
+    create: true
+    slug: '{{titolo}}'
+    identifier_field: titolo
+    summary: '{{inizio}} · {{titolo}}'
+    sortable_fields: [inizio, titolo]
+    fields:
+      - { name: titolo, label: Titolo, widget: string }
+      - name: inizio
+        label: Inizio
+        widget: datetime
+        format: 'YYYY-MM-DD[T]HH:mm'
+        picker_utc: false
+      - name: fine
+        label: Fine
+        widget: datetime
+        format: 'YYYY-MM-DD[T]HH:mm'
+        picker_utc: false
+        required: false
+      - { name: tutto_il_giorno, label: Tutto il giorno, widget: boolean, required: false, default: false }
+      - { name: luogo, label: Luogo, widget: string, required: false, default: Sede Laboratorio Freudiano }
+      - { name: indirizzo, label: Indirizzo, widget: string, required: false, default: 'Piazza Aspromonte 13, Milano' }
+      - { name: online, label: 'Collegamento online (Zoom, streaming…)', widget: string, required: false }
+      - { name: locandina, label: Locandina, widget: image, required: false }
+      - name: siti
+        label: Pubblica su
+        widget: select
+        multiple: true
+        default: [ali-milano]
+        options:
+          - { label: ALI Milano, value: ali-milano }
+          - { label: Freudlab, value: freudlab }
+      - { name: body, label: Descrizione, widget: markdown, required: false }
+      - { name: vecchio_url, label: Indirizzo sul vecchio sito, widget: hidden, required: false }
+
+  - name: pubblicazioni
+    label: Pubblicazioni
+    label_singular: Pubblicazione
+    description: Libri, articoli, seminari e dossier.
+    folder: src/content/pubblicazioni
+    create: true
+    slug: '{{titolo}}'
+    identifier_field: titolo
+    summary: '{{titolo}} ({{categoria}})'
+    sortable_fields: [data, titolo]
+    view_groups:
+      - { label: Categoria, field: categoria }
+    fields:
+      - { name: titolo, label: Titolo, widget: string }
+      - { name: data, label: Data di pubblicazione, widget: datetime, format: 'YYYY-MM-DD', time_format: false }
+      - name: categoria
+        label: Categoria
+        widget: select
+        options:
+          - { label: Libri, value: libri }
+          - { label: Articoli, value: articoli }
+          - { label: Seminari, value: seminari }
+          - { label: Dossier, value: dossier }
+      - { name: immagine, label: Immagine o copertina, widget: image, required: false }
+      - { name: riassunto, label: Riassunto (per le anteprime), widget: text, required: false }
+      - { name: body, label: Testo, widget: markdown }
+      - { name: vecchio_url, label: Indirizzo sul vecchio sito, widget: hidden, required: false }
+
+  - name: documenti
+    label: Documenti
+    label_singular: Documento
+    description: PDF da scaricare (relazioni, testi dei seminari…).
+    folder: src/content/documenti
+    create: true
+    slug: '{{titolo}}'
+    identifier_field: titolo
+    fields:
+      - { name: titolo, label: Titolo, widget: string }
+      - { name: autore, label: Autore, widget: string, required: false }
+      - { name: data, label: Data, widget: datetime, format: 'YYYY-MM-DD', time_format: false }
+      - { name: file, label: File PDF, widget: file }
+      - name: sezione
+        label: Pagina in cui compare
+        widget: select
+        default: consultorio
+        options:
+          - { label: Consultorio, value: consultorio }
+      - { name: body, label: Descrizione, widget: markdown, required: false }
+
+  - name: pagine
+    label: Pagine
+    label_singular: Pagina
+    description: I testi delle pagine fisse del sito.
+    folder: src/content/pagine
+    create: false
+    delete: false
+    identifier_field: titolo
+    fields:
+      - { name: titolo, label: Titolo, widget: string }
+      - { name: sottotitolo, label: Sottotitolo, widget: string, required: false }
+      - { name: ordine, label: Ordine, widget: hidden, required: false }
+      - { name: body, label: Testo, widget: markdown }
+
+  - name: impostazioni
+    label: Impostazioni
+    description: Testi della home, contatti, soci e locandine.
+    files:
+      - name: home
+        label: Home page
+        file: src/content/impostazioni/home.json
+        fields:
+          - { name: titolo, label: Titolo principale, widget: string }
+          - { name: introduzione, label: Testo di presentazione, widget: markdown }
+          - { name: immagine, label: Immagine, widget: image }
+          - { name: consultorio_titolo, label: Titolo del riquadro Consultorio, widget: string }
+          - { name: consultorio_testo, label: Testo del riquadro Consultorio, widget: markdown }
+
+      - name: sito
+        label: Contatti e link
+        file: src/content/impostazioni/sito.json
+        fields:
+          - { name: nome, label: Nome dell’associazione, widget: string }
+          - { name: sigla, label: Sigla, widget: string }
+          - { name: descrizione, label: Descrizione per Google, widget: text }
+          - { name: indirizzo, label: Indirizzo, widget: string }
+          - { name: come_arrivare, label: Come arrivare, widget: string }
+          - { name: telefono, label: Telefono, widget: string }
+          - { name: email, label: Email, widget: string }
+          - { name: email_consultorio, label: Email del Consultorio, widget: string }
+          - { name: consultorio_roma, label: Nota sul Consultorio di Roma, widget: string, required: false }
+          - { name: mappa, label: Link alla mappa, widget: string }
+          - { name: modulo_contatti, label: Indirizzo del servizio moduli (es. Formspree), widget: string, required: false }
+          - name: social
+            label: Social
+            widget: list
+            fields:
+              - { name: nome, label: Nome, widget: string }
+              - { name: url, label: Indirizzo, widget: string }
+          - name: link_utili
+            label: Link utili
+            widget: list
+            fields:
+              - { name: nome, label: Nome, widget: string }
+              - { name: url, label: Indirizzo, widget: string }
+
+      - name: soci
+        label: Soci
+        file: src/content/impostazioni/soci.json
+        fields:
+          - name: soci
+            label: Soci
+            widget: list
+            summary: '{{nome}}'
+            fields:
+              - { name: nome, label: Nome e cognome, widget: string }
+              - { name: email, label: Email, widget: string, required: false }
+              - { name: citta, label: Città, widget: string, required: false }
+
+      - name: locandine
+        label: Locandine
+        file: src/content/impostazioni/locandine.json
+        fields:
+          - name: locandine
+            label: Locandine
+            widget: list
+            summary: '{{titolo}}'
+            fields:
+              - { name: titolo, label: Titolo, widget: string }
+              - { name: immagine, label: Immagine, widget: image }

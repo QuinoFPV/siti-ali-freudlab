@@ -1,0 +1,20 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  titolo: string;
+  sottotitolo?: string;
+  occhiello?: string;
+}
+const { titolo, sottotitolo, occhiello } = Astro.props;
+---
+<Base titolo={titolo} descrizione={sottotitolo}>
+  <header class="testata-pagina">
+    <div class="contenitore">
+      {occhiello && <p class="occhiello">{occhiello}</p>}
+      <h1>{titolo}</h1>
+      {sottotitolo && <p>{sottotitolo}</p>}
+    </div>
+  </header>
+  <slot />
+</Base>

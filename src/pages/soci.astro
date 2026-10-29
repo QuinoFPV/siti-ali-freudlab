@@ -1,0 +1,27 @@
+---
+import Pagina from '../layouts/Pagina.astro';
+import { soci } from '../content/impostazioni/soci.json';
+
+const ordinati = [...soci].sort((a, b) => a.nome.split(' ').at(-1)!.localeCompare(b.nome.split(' ').at(-1)!, 'it'));
+---
+<Pagina titolo="Soci" occhiello="L’Associazione" sottotitolo="I soci dell’Associazione lacaniana internazionale Milano">
+  <section class="sezione">
+    <ul class="contenitore soci">
+      {ordinati.map((s) => (
+        <li>
+          <strong>{s.nome}</strong>
+          {'citta' in s && s.citta && <span>{s.citta}</span>}
+          {'email' in s && s.email && <a href={`mailto:${s.email}`}>{s.email}</a>}
+        </li>
+      ))}
+    </ul>
+  </section>
+</Pagina>
+
+<style>
+  .soci { list-style: none; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .soci li { display: flex; flex-direction: column; gap: 4px; padding: 20px 22px; border: 1px solid var(--linea); border-left: 3px solid var(--bordeaux); border-radius: var(--raggio); }
+  .soci strong { font: 600 1.05rem/1.3 var(--titoli); color: var(--inchiostro); }
+  .soci span { color: var(--grigio); font-size: 0.92rem; }
+  .soci a { font-size: 0.92rem; overflow-wrap: anywhere; }
+</style>

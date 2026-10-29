@@ -1,0 +1,49 @@
+---
+import { render } from 'astro:content';
+import Pagina from '../../layouts/Pagina.astro';
+import { eventiDelSito, dataLunga, orario } from '../../lib/utili';
+
+export async function getStaticPaths() {
+  return (await eventiDelSito()).map((e) => ({ params: { evento: e.id }, props: { e } }));
+}
+const { e } = Astro.props;
+const { Content } = await render(e);
+const d = e.data;
+---
+<Pagina titolo={d.titolo} occhiello="Appuntamento">
+  <section class="sezione">
+    <div class="contenitore evento">
+      <aside class="dettagli">
+        <dl>
+          <dt>Quando</dt>
+          <dd>{dataLunga(d.inizio)}<br />{orario(d)}</dd>
+          {d.luogo && <><dt>Dove</dt><dd>{d.luogo}{d.indirizzo && <><br /><span>{d.indirizzo}</span></>}</dd></>}
+          {d.online && <><dt>Online</dt><dd><a href={d.online} rel="noopener">Collegamento</a></dd></>}
+        </dl>
+        <a class="bottone bottone--chiaro" href={`/appuntamenti/${e.id}.ics`}>Aggiungi al calendario</a>
+        {d.locandina && (
+          <a class="locandina" href={d.locandina}><img src={d.locandina} alt={`Locandina: ${d.titolo}`} loading="lazy" /></a>
+        )}
+      </aside>
+      <div class="prosa"><Content /></div>
+    </div>
+    <p class="contenitore indietro"><a href="/appuntamenti/">← Tutti gli appuntamenti</a></p>
+  </section>
+</Pagina>
+
+<style>
+  .evento { display: grid; grid-template-columns: 320px 1fr; gap: clamp(32px, 5vw, 64px); align-items: start; }
+  .dettagli { position: sticky; top: 100px; display: flex; flex-direction: column; gap: 20px; }
+  dl { margin: 0; padding: 22px; background: var(--carta); border-radius: var(--raggio); border-top: 3px solid var(--bordeaux); }
+  dt { font: 600 0.75rem/1 var(--titoli); letter-spacing: 0.12em; text-transform: uppercase; color: var(--bordeaux); margin-top: 16px; }
+  dt:first-child { margin-top: 0; }
+  dd { margin: 6px 0 0; color: var(--inchiostro); }
+  dd::first-letter { text-transform: uppercase; }
+  dd span { color: var(--grigio); font-size: 0.92rem; }
+  .locandina img { border: 1px solid var(--linea); border-radius: var(--raggio); }
+  .indietro { margin-top: 48px; }
+  @media (max-width: 860px) {
+    .evento { grid-template-columns: 1fr; }
+    .dettagli { position: static; }
+  }
+</style>

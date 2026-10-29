@@ -1,0 +1,61 @@
+{
+  "nome": "Associazione Lacaniana Internazionale Milano",
+  "sigla": "ALI Milano",
+  "descrizione": "L’Associazione lacaniana internazionale Milano: seminari, pubblicazioni e il Consultorio di psicoanalisi “Edipo in città”.",
+  "indirizzo": "Piazza Aspromonte 13, 20131 Milano",
+  "come_arrivare": "MM1 e MM2 – fermata Loreto, uscita viale Gran Sasso",
+  "telefono": "347 8445889",
+  "email": "infofreudlab@gmail.com",
+  "email_consultorio": "consultoriopsicoanalisi@ali-milano.it",
+  "consultorio_roma": "Il consultorio è attivo anche a Roma, in Piazza della Radio 7 – tel. 346 2271479",
+  "mappa": "https://www.openstreetmap.org/?mlat=45.4841&mlon=9.2195#map=17/45.4841/9.2195",
+  "modulo_contatti": "",
+  "social": [
+    {
+      "nome": "Facebook",
+      "url": "https://www.facebook.com/freudlab.milano/"
+    },
+    {
+      "nome": "X",
+      "url": "https://twitter.com/freudlabmilano"
+    }
+  ],
+  "link_utili": [
+    {
+      "nome": "Association lacanienne internationale",
+      "url": "https://www.freud-lacan.com"
+    },
+    {
+      "nome": "ALI in Italia",
+      "url": "http://www.freud-lacan.it"
+    },
+    {
+      "nome": "ALI Napoli",
+      "url": "http://www.ali-napoli.it"
+    },
+    {
+      "nome": "ALI Torino",
+      "url": "http://www.ali-to.it"
+    },
+    {
+      "nome": "ALI Roma",
+      "url": "http://www.ali-roma.it"
+    },
+    {
+      "nome": "ALI Rhône-Alpes",
+      "url": "http://www.ali-rhonealpes.org"
+    },
+    {
+      "nome": "Laboratorio freudiano Milano",
+      "url": "https://freudlab.it"
+    },
+    {
+      "nome": "Laboratorio freudiano Roma",
+      "url": "http://www.laboratoriofreudiano.it"
+    },
+    {
+      "nome": "Casa della Cultura di Milano",
+      "url": "https://casadellacultura.it"
+    }
+  ]
+}
