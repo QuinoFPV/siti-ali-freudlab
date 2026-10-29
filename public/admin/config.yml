@@ -3,7 +3,7 @@
 
 backend:
   name: github
-  repo: PROPRIETARIO/ali-milano-demo # da aggiornare quando il repository è su GitHub
+  repo: QuinoFPV/ali-milano-demo
   branch: main
   commit_messages:
     create: 'Nuovo {{collection}}: {{slug}}'
