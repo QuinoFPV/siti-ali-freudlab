@@ -60,7 +60,7 @@ const descrizioni = await Promise.all(documenti.map(async (d) => (await render(d
   .grigio { color: var(--grigio); font-size: 0.9rem; }
   #documenti h2 { margin-top: 0; }
   .documenti { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-  .documento { display: flex; flex-direction: column; padding: 24px; background: #fff; border: 1px solid var(--linea); border-radius: var(--raggio); }
+  .documento { display: flex; flex-direction: column; padding: 24px; background: var(--superficie); border: 1px solid var(--linea); border-radius: var(--raggio); }
   .documento h3 { margin: 0 0 6px; font-size: 1.1rem; }
   .autore { color: var(--accento); font-size: 0.88rem; font-weight: 600; }
   .descrizione { color: var(--grigio); font-size: 0.95rem; flex: 1; }

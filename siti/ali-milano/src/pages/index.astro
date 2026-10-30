@@ -1,5 +1,7 @@
 ---
+import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import Ellissi from '../components/Ellissi.astro';
 import ProssimiEventi from '@condiviso/components/ProssimiEventi.astro';
 import ModuloContatti from '@condiviso/components/ModuloContatti.astro';
 import home from '@impostazioni/home.json';
@@ -7,59 +9,88 @@ import sito from '@impostazioni/sito.json';
 import { md, CATEGORIE, pubblicazioniDelSito } from '@condiviso/lib/utili';
 
 const pubblicazioni = await pubblicazioniDelSito();
-const conteggio = (c: string) => pubblicazioni.filter((p) => p.data.categoria === c).length;
-const ultime = pubblicazioni
-  .filter((p) => p.data.immagine)
-  .sort((a, b) => b.data.data.localeCompare(a.data.data))
-  .slice(0, 3);
+const categorie = (['libri', 'articoli', 'seminari', 'dossier'] as const)
+  .map((k) => ({ k, nome: CATEGORIE[k], quante: pubblicazioni.filter((p) => p.data.categoria === k).length }))
+  .filter((c) => c.quante);
+const ultime = pubblicazioni.filter((p) => p.data.immagine).slice(0, 3);
 
-const scorciatoie = [
-  ...Object.entries(CATEGORIE).map(([k, nome]) => ({ nome, url: `/pubblicazioni/#${k}`, nota: `${conteggio(k)} titoli` })),
-  { nome: 'Documenti', url: '/consultorio/#documenti', nota: 'Testi da scaricare' },
-  { nome: 'Locandine', url: '/pubblicazioni/#locandine', nota: 'Programmi degli anni' },
-];
+// Dalle pagine: i tre principi del Consultorio e la frase di "Chi siamo"
+const consultorio = (await getEntry('pagine', 'consultorio'))!;
+const principi = [...consultorio.body!.matchAll(/^- (.+)$/gm)].map((m) => m[1]).slice(0, 3);
+const chiSiamo = (await getEntry('pagine', 'chi-siamo'))!;
+const scommessa = chiSiamo.body!.match(/^> (.+)$/m)?.[1];
 ---
 <Base>
-  <section class="eroe">
-    <div class="contenitore eroe__griglia">
-      <div class="eroe__testo">
-        <p class="occhiello">Dal 1998 a Milano</p>
-        <h1>{home.titolo}</h1>
-        <hr class="filetto" />
-        <div class="eroe__intro" set:html={md(home.introduzione)} />
-        <div class="eroe__azioni">
-          <a class="bottone" href="/chi-siamo/">Scopri di più</a>
-          <a class="bottone bottone--chiaro" href="/appuntamenti/">Appuntamenti</a>
+  <section class="apertura">
+    <div class="contenitore apertura__griglia">
+      <div class="apertura__testo">
+        <h1>Associazione lacaniana internazionale <span>Milano</span></h1>
+        <div class="apertura__intro" set:html={md(home.introduzione.split('\n\n')[0])} />
+        <div class="apertura__azioni">
+          <a class="bottone" href="/appuntamenti/">Seminari e appuntamenti</a>
+          <a class="bottone bottone--chiaro" href="/consultorio/">Il Consultorio</a>
         </div>
       </div>
-      <div class="eroe__immagine">
-        <img src={home.immagine} alt="La sede dell’associazione in piazza Aspromonte" width="734" height="1014" />
+      <div class="apertura__figura">
+        <Ellissi />
       </div>
     </div>
   </section>
 
   <section class="sezione sezione--carta">
-    <div class="contenitore due-colonne">
+    <div class="contenitore calendario">
       <div>
-        <p class="occhiello">Calendario</p>
         <h2>Prossimi appuntamenti</h2>
-        <p>Seminari, giornate di studio e presentazioni dell’Associazione lacaniana internazionale Milano.</p>
-        <p><a href="/appuntamenti/">Tutti gli appuntamenti →</a><br /><a href="/appuntamenti.ics">Aggiungi al tuo calendario</a></p>
+        <p>Seminari, insegnamenti del sabato, giornate di studio e presentazioni di libri, in sede e alla Casa della Cultura.</p>
+        <p class="link"><a href="/appuntamenti/">Calendario e archivio</a><br /><a href="/appuntamenti.ics">Aggiungi al tuo calendario</a></p>
       </div>
       <ProssimiEventi limite={4} />
     </div>
   </section>
 
-  <section class="sezione">
-    <div class="contenitore">
-      <p class="occhiello">Archivio</p>
-      <h2 class="senza-margine">Pubblicazioni</h2>
-      <ul class="scorciatoie">
-        {scorciatoie.map((s) => (
-          <li><a href={s.url}><strong>{s.nome}</strong><span>{s.nota}</span></a></li>
-        ))}
-      </ul>
-      <div class="griglia-schede">
+  <section class="consultorio">
+    <div class="contenitore consultorio__griglia">
+      <div>
+        <p class="consultorio__nome">Consultorio di psicoanalisi</p>
+        <h2>“Edipo in città”</h2>
+        <div class="consultorio__testo" set:html={md(home.consultorio_testo)} />
+        <a class="bottone bottone--bianco" href="/consultorio/">Come funziona il Consultorio</a>
+      </div>
+      <div class="consultorio__lato">
+        <p class="consultorio__intro">Il Consultorio accoglie la domanda di chi soffre e, in coerenza con il discorso psicoanalitico:</p>
+        <ul>{principi.map((p) => <li>{p}</li>)}</ul>
+        <p class="consultorio__recapito">
+          Si riceve su appuntamento in {sito.indirizzo}<br />
+          Tel. <a href={`tel:${sito.telefono.replace(/\s/g, '')}`}>{sito.telefono}</a> · <a href={`mailto:${sito.email_consultorio}`}>{sito.email_consultorio}</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {scommessa && (
+    <section class="sezione scommessa">
+      <div class="contenitore">
+        <blockquote>
+          <p>{scommessa}</p>
+        </blockquote>
+        <p class="link"><a href="/chi-siamo/">La storia dell’associazione</a></p>
+      </div>
+    </section>
+  )}
+
+  <section class="sezione sezione--carta">
+    <div class="contenitore pubblicazioni">
+      <div>
+        <h2>Pubblicazioni</h2>
+        <ul class="indice">
+          {categorie.map((c) => (
+            <li><a href={`/pubblicazioni/#${c.k}`}><span>{c.nome}</span><span class="numero">{c.quante}</span></a></li>
+          ))}
+          <li><a href="/consultorio/#documenti"><span>Documenti da scaricare</span><span class="numero">PDF</span></a></li>
+          <li><a href="/pubblicazioni/#locandine"><span>Locandine dei programmi</span><span class="numero"></span></a></li>
+        </ul>
+      </div>
+      <div class="ultime">
         {ultime.map((p) => (
           <a class="scheda" href={`/pubblicazioni/${p.id}/`}>
             <img src={p.data.immagine} alt="" loading="lazy" />
@@ -73,27 +104,13 @@ const scorciatoie = [
     </div>
   </section>
 
-  <section class="consultorio">
-    <div class="contenitore consultorio__griglia">
-      <div>
-        <p class="occhiello occhiello--chiaro">Consultorio di psicoanalisi</p>
-        <h2>{home.consultorio_titolo}</h2>
-      </div>
-      <div>
-        <div set:html={md(home.consultorio_testo)} />
-        <a class="bottone bottone--bianco" href="/consultorio/">Vai al consultorio</a>
-      </div>
-    </div>
-  </section>
-
   <section class="sezione">
-    <div class="contenitore due-colonne">
+    <div class="contenitore contatti">
       <div>
-        <p class="occhiello">Contatti</p>
         <h2>Scrivici</h2>
         <p>{sito.indirizzo}<br /><span class="grigio">{sito.come_arrivare}</span></p>
         <p>Tel. <a href={`tel:${sito.telefono.replace(/\s/g, '')}`}>{sito.telefono}</a><br /><a href={`mailto:${sito.email}`}>{sito.email}</a></p>
-        <p><a href={sito.mappa} rel="noopener">Apri la mappa →</a></p>
+        <p><a href={sito.mappa} rel="noopener">Apri la mappa</a></p>
       </div>
       <ModuloContatti />
     </div>
@@ -101,40 +118,57 @@ const scorciatoie = [
 </Base>
 
 <style>
-  .eroe { background: var(--carta) url('/uploads/2022/01/circle-background-pattern.png') left -180px bottom -220px / 640px no-repeat; border-bottom: 1px solid var(--linea); }
-  .eroe__griglia { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(32px, 6vw, 80px); align-items: center; padding: clamp(40px, 7vw, 88px) 0; }
-  .eroe h1 { text-transform: uppercase; font-size: clamp(2rem, 4.2vw, 3.2rem); line-height: 1.1; hyphens: manual; }
-  .eroe__intro { font-size: 1.08rem; max-width: 560px; }
-  .eroe__intro :global(a) { font-weight: 600; }
-  .eroe__azioni { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
-  .eroe__immagine img { width: 100%; max-height: 620px; object-fit: cover; border-radius: var(--raggio); box-shadow: 24px 24px 0 var(--accento-chiaro); }
+  .apertura { background: var(--fondo); border-bottom: 1px solid var(--linea); overflow: hidden; }
+  .apertura__griglia { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: clamp(24px, 5vw, 64px); align-items: center; padding: clamp(48px, 8vw, 104px) 0 clamp(40px, 6vw, 88px); }
+  .apertura h1 { font-size: clamp(2.9rem, 6.6vw, 5.4rem); line-height: 0.98; font-weight: 500; letter-spacing: -0.02em; margin: 0; font-variation-settings: 'opsz' 96; }
+  .apertura h1 span { display: block; font-style: italic; color: var(--accento); }
+  .apertura__intro { font-size: 1.12rem; max-width: 52ch; margin-top: 28px; }
+  .apertura__intro :global(a) { font-weight: 600; }
+  .apertura__azioni { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+  .apertura__figura { max-width: 440px; width: 100%; justify-self: center; }
 
-  .due-colonne { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: clamp(32px, 6vw, 72px); align-items: start; }
-  .due-colonne h2 { margin-top: 0; }
-  .senza-margine { margin-top: 0; }
+  .calendario { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(32px, 6vw, 72px); align-items: start; }
+  .calendario h2 { margin-top: 0; }
+  .link { margin-top: 20px; }
+
+  .consultorio { background: var(--vino); color: #f3e4e5; padding: clamp(56px, 8vw, 104px) 0; }
+  .consultorio__griglia { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 80px); align-items: start; }
+  .consultorio__nome { font: italic 500 1.15rem/1.3 var(--titoli); color: #e6b6ba; margin: 0 0 4px; }
+  .consultorio h2 { color: #fff; margin: 0 0 24px; font-size: clamp(2.2rem, 4.4vw, 3.4rem); }
+  .consultorio__testo { font-size: 1.08rem; }
+  .consultorio__testo :global(strong) { color: #fff; }
+  .consultorio__lato { border-left: 1px solid rgb(255 255 255 / .2); padding-left: clamp(20px, 3vw, 40px); }
+  .consultorio__intro { color: #e6c9cb; }
+  .consultorio ul { list-style: none; padding: 0; margin: 0 0 28px; }
+  .consultorio li { font: 500 1.3rem/1.35 var(--titoli); font-variation-settings: 'opsz' 28; color: #fff; padding: 14px 0; border-bottom: 1px solid rgb(255 255 255 / .16); }
+  .consultorio__recapito { font-size: 0.97rem; color: #e6c9cb; }
+  .consultorio a:not(.bottone) { color: #fff; }
+
+  .scommessa { text-align: left; }
+  .scommessa blockquote { margin: 0; padding-left: clamp(16px, 3vw, 40px); border-left: 3px solid var(--accento); }
+  .scommessa blockquote p { max-width: 34ch; font: italic 500 clamp(1.5rem, 2.8vw, 2.3rem)/1.28 var(--titoli); font-variation-settings: 'opsz' 60; color: var(--inchiostro); margin: 0; text-wrap: pretty; }
+
+  .pubblicazioni { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(32px, 6vw, 72px); align-items: start; }
+  .pubblicazioni h2 { margin-top: 0; }
+  .indice { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--inchiostro); }
+  .indice a { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--linea); text-decoration: none; color: var(--inchiostro); font: 500 1.25rem/1.3 var(--titoli); font-variation-settings: 'opsz' 24; }
+  .indice a:hover { color: var(--accento); }
+  .numero { font: 500 0.95rem/1 var(--corpo); color: var(--grigio); font-variant-numeric: tabular-nums; }
+  .ultime { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+
+  .contatti { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(32px, 6vw, 72px); }
+  .contatti h2 { margin-top: 0; }
   .grigio { color: var(--grigio); font-size: 0.95rem; }
 
-  .scorciatoie { list-style: none; padding: 0; margin: 28px 0 40px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
-  .scorciatoie a { display: flex; flex-direction: column; gap: 2px; padding: 16px 18px; border: 1px solid var(--linea); border-radius: var(--raggio); text-decoration: none; color: var(--inchiostro); transition: .15s; }
-  .scorciatoie a:hover { border-color: var(--accento); background: var(--accento-chiaro); }
-  .scorciatoie strong { font-family: var(--titoli); }
-  .scorciatoie span { font-size: 0.85rem; color: var(--grigio); }
-
-  .consultorio { background: var(--accento) url('/uploads/2022/01/circle-background-pattern.png') right -160px center / 560px no-repeat; color: #fff; padding: clamp(56px, 8vw, 96px) 0; }
-  .consultorio h2 { color: #fff; margin: 0; font-size: clamp(1.6rem, 3vw, 2.3rem); }
-  .occhiello--chiaro { color: #f3cfcf; }
-  .consultorio__griglia { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 72px); align-items: start; }
-  .consultorio :global(p) { font-size: 1.05rem; }
-
   @media (max-width: 960px) {
-    .scorciatoie { grid-template-columns: repeat(3, 1fr); }
+    .ultime { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 860px) {
-    .eroe__griglia, .due-colonne, .consultorio__griglia { grid-template-columns: 1fr; }
-    .eroe__immagine { order: -1; }
-    .eroe__immagine img { max-height: 340px; box-shadow: none; }
+    .apertura__griglia, .calendario, .consultorio__griglia, .pubblicazioni, .contatti { grid-template-columns: 1fr; }
+    .apertura__figura { max-width: 300px; order: -1; }
+    .consultorio__lato { border-left: 0; padding-left: 0; border-top: 1px solid rgb(255 255 255 / .2); padding-top: 24px; }
   }
   @media (max-width: 520px) {
-    .scorciatoie { grid-template-columns: repeat(2, 1fr); }
+    .ultime { grid-template-columns: 1fr; }
   }
 </style>

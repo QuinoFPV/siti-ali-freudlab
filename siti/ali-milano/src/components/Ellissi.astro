@@ -1,0 +1,64 @@
+---
+// La figura del logo ALI Milano: cinque anelli (a, b, c, d, e) che partono
+// dallo stesso punto in basso e si aprono a ventaglio, con un piccolo cerchio
+// al centro. All'apertura della pagina gli anelli, già visibili e sovrapposti,
+// si aprono fino alla loro posizione.
+
+// Perno comune in basso, attorno a cui ruotano gli anelli
+const perno = { x: 0, y: 150 };
+const anelli = [
+  { lettera: 'a', rx: 104, ry: 128, cy: 22, gradi: -24 },
+  { lettera: 'b', rx: 64, ry: 164, cy: -14, gradi: -15 },
+  { lettera: 'c', rx: 58, ry: 172, cy: -22, gradi: 0 },
+  { lettera: 'd', rx: 64, ry: 164, cy: -14, gradi: 15 },
+  { lettera: 'e', rx: 104, ry: 128, cy: 22, gradi: 24 },
+];
+
+// Posizione della lettera: appena sopra la cima dell'anello, dopo la rotazione
+const ruota = (x: number, y: number, gradi: number) => {
+  const a = (gradi * Math.PI) / 180;
+  const dx = x - perno.x, dy = y - perno.y;
+  return { x: perno.x + dx * Math.cos(a) - dy * Math.sin(a), y: perno.y + dx * Math.sin(a) + dy * Math.cos(a) };
+};
+// a ed e sono gli anelli larghi: la loro lettera va sulla spalla esterna, non in cima
+const etichette = anelli.map((e) => {
+  const largo = e.rx > 90;
+  const punto = largo
+    ? ruota(Math.sign(e.gradi) * e.rx * 0.72, e.cy - e.ry * 0.72 - 20, e.gradi)
+    : ruota(0, e.cy - e.ry - 22, e.gradi);
+  return { ...punto, lettera: e.lettera };
+});
+---
+<svg class="ellissi" viewBox="-230 -230 460 420" role="img" aria-labelledby="ellissi-titolo">
+  <title id="ellissi-titolo">La figura del logo dell’Associazione lacaniana internazionale Milano</title>
+  <g class="anelli">
+    {anelli.map((e) => (
+      <ellipse cx="0" cy={e.cy} rx={e.rx} ry={e.ry} style={`--gradi: ${e.gradi}deg`} />
+    ))}
+    <circle class="centro" cx="0" cy="-6" r="30" />
+  </g>
+  <g class="lettere">
+    {etichette.map((l) => <text x={l.x.toFixed(1)} y={l.y.toFixed(1)} text-anchor="middle">{l.lettera}</text>)}
+  </g>
+</svg>
+
+<style>
+  .ellissi { width: 100%; height: auto; overflow: visible; }
+  ellipse, circle { fill: none; stroke: var(--accento); stroke-width: 2.2; }
+  ellipse {
+    transform-box: view-box;
+    transform-origin: 0 150px;
+    transform: rotate(var(--gradi));
+    animation: ventaglio 1.4s cubic-bezier(.45, 0, .15, 1) .25s backwards;
+  }
+  .centro { stroke-width: 2; }
+  text { font: italic 400 26px var(--titoli); fill: var(--grigio); }
+  .lettere { animation: compare .5s ease-out 1.4s backwards; }
+
+  @keyframes ventaglio { from { transform: rotate(0deg); } }
+  @keyframes compare { from { opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    ellipse, .lettere { animation: none; }
+  }
+</style>

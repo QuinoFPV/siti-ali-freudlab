@@ -6,7 +6,9 @@ import { locandine } from '@impostazioni/locandine.json';
 import sito from '@impostazioni/sito.json';
 
 const tutte = await pubblicazioniDelSito();
-const sezioni = Object.entries(CATEGORIE).map(([k, nome]) => ({ k, nome, voci: tutte.filter((p) => p.data.categoria === k) }));
+const sezioni = Object.entries(CATEGORIE)
+  .map(([k, nome]) => ({ k, nome, voci: tutte.filter((p) => p.data.categoria === k) }))
+  .filter((s) => s.voci.length);
 ---
 <Pagina titolo="Pubblicazioni" sottotitolo="Libri, articoli, seminari e dossier dei soci e degli ospiti dell’Associazione.">
   <nav class="schede-nav" aria-label="Sezioni">
@@ -53,9 +55,9 @@ const sezioni = Object.entries(CATEGORIE).map(([k, nome]) => ({ k, nome, voci: t
 </Pagina>
 
 <style>
-  .schede-nav { position: sticky; top: 77px; z-index: 10; background: #fff; border-bottom: 1px solid var(--linea); }
+  .schede-nav { position: sticky; top: 77px; z-index: 10; background: var(--fondo); border-bottom: 1px solid var(--linea); }
   .schede-nav .contenitore { display: flex; gap: 4px; overflow-x: auto; }
-  .schede-nav a { padding: 14px 14px; white-space: nowrap; text-decoration: none; font: 600 0.82rem/1 var(--titoli); letter-spacing: 0.06em; text-transform: uppercase; color: var(--inchiostro); }
+  .schede-nav a { padding: 14px 14px; white-space: nowrap; text-decoration: none; font: 500 0.97rem/1 var(--corpo); color: var(--inchiostro); }
   .schede-nav a:hover { color: var(--accento); }
   .schede-nav span { color: var(--grigio); font-weight: 500; }
   section h2 { margin-top: 0; }
